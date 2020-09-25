@@ -12,21 +12,25 @@ using IdentityTutorial.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using IdentityTutorial.Models;
 
 namespace IdentityTutorial
 {
     public class Startup
     {
+        public IConfiguration Configuration { get; }
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-        }
-
-        public IConfiguration Configuration { get; }
+        }                
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            //// Add the service required for using options.
+            //services.AddOptions();
+            //services.Configure<MyOptions>(Configuration);
+
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
@@ -44,7 +48,7 @@ namespace IdentityTutorial
             services.Configure<IdentityOptions>(options =>
             {
                 // Password settings.
-                options.SignIn.RequireConfirmedAccount = true;
+                options.SignIn.RequireConfirmedAccount = false;
                 options.Password.RequireDigit = true;
                 options.Password.RequireLowercase = true;
                 options.Password.RequireNonAlphanumeric = true;
@@ -108,7 +112,7 @@ namespace IdentityTutorial
             CreateRolesAndAdminUser(serviceProvider);
         }
 
-        private static void CreateRolesAndAdminUser(IServiceProvider serviceProvider)
+        private void CreateRolesAndAdminUser(IServiceProvider serviceProvider)
         {
             const string adminRoleName = "Administrator";
             string[] roleNames = { adminRoleName, "Manager", "Member" };
@@ -119,9 +123,11 @@ namespace IdentityTutorial
             }
 
             // Get these value from "appsettings.json" file.
-            string adminUserEmail = "someone22@somewhere.com";
-            string adminPwd = "_AStrongP1@ssword!";
-            AddUserToRole(serviceProvider, adminUserEmail, adminPwd, adminRoleName);
+            //string adminUserEmail = "someone22@somewhere.com";
+            //string adminPwd = "_AStrongP1@ssword!";
+            string adminUserEmail = Configuration["AdminAccount:adminUserEmail"];
+            string adminPwd = Configuration["AdminAccount:adminPwd"];
+            AddUserToRole(serviceProvider, adminUserEmail, adminPwd, "Member");
         }
 
         /// <summary>

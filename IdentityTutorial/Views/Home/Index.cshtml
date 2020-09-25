@@ -6,3 +6,24 @@
     <h1 class="display-4">Welcome</h1>
     <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Controller</th>
+            <th>Actions</th>            
+        </tr>
+    </thead>
+    <tbody>
+            <tr>
+                <td>
+                    HomeController
+                </td>
+                <td>
+                    <a asp-action="GetUsers">Display Users</a> |
+                    @*<a asp-action="GetRoles">Display Roles</a>*@                    
+                </td>
+            </tr>
+
+    </tbody>
+</table>
