@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ContosoUniversity", "..\Con
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityTutorial", "..\IdentityTutorial\IdentityTutorial.csproj", "{442E0B2F-34DD-4856-A2F4-B9D830D29F31}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dochazka", "..\Dochazka\Dochazka.csproj", "{032AEB79-9D11-4C38-B353-6082E659C587}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dochazka", "..\Dochazka\Dochazka.csproj", "{032AEB79-9D11-4C38-B353-6082E659C587}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
