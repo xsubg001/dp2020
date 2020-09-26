@@ -7,22 +7,48 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Dochazka.Data;
 using Dochazka.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Identity;
+using Dochazka.Authorization;
 
 namespace Dochazka.Controllers
 {
-    public class ContactsController : Controller
+    public class ContactsController : DI_BaseController
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ILogger<ContactsController> _logger;
 
-        public ContactsController(ApplicationDbContext context)
+        public ContactsController(
+            ILogger<ContactsController> logger,
+            ApplicationDbContext context,
+            IAuthorizationService authorizationService,
+            UserManager<IdentityUser> userManager)
+            : base(context, authorizationService, userManager)
         {
-            _context = context;
+            _logger = logger;
         }
 
         // GET: Contacts
+        [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Contact.ToListAsync());
+            var contacts = from c in Context.Contact
+                           select c;
+            
+            var isAuthorized = User.IsInRole(Constants.ContactManagersRole) ||
+                               User.IsInRole(Constants.ContactAdministratorsRole);
+
+            var currentUserId = UserManager.GetUserId(User);
+
+            // Only approved contacts are shown UNLESS you're authorized to see them
+            // or you are the owner.
+            if (!isAuthorized)
+            {
+                contacts = contacts.Where(c => c.Status == ContactStatus.Approved
+                                            || c.OwnerID == currentUserId);
+            }
+
+            return View(await contacts.ToListAsync());
         }
 
         // GET: Contacts/Details/5
@@ -33,7 +59,7 @@ namespace Dochazka.Controllers
                 return NotFound();
             }
 
-            var contact = await _context.Contact
+            var contact = await Context.Contact
                 .FirstOrDefaultAsync(m => m.ContactId == id);
             if (contact == null)
             {
@@ -56,13 +82,27 @@ namespace Dochazka.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ContactId,Name,Address,City,State,Zip,Email")] Contact contact)
         {
-            if (ModelState.IsValid)
+
+            if (!ModelState.IsValid)
             {
-                _context.Add(contact);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return View(contact);
             }
-            return View(contact);
+
+            contact.OwnerID = UserManager.GetUserId(User);
+
+            // requires using ContactManager.Authorization;
+            var isAuthorized = await AuthorizationService.AuthorizeAsync(
+                                                        User, contact,
+                                                        ContactOperations.Create);
+
+            if (!isAuthorized.Succeeded)
+            {
+                return Forbid();
+            }
+
+            Context.Add(contact);
+            await Context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Contacts/Edit/5
@@ -73,7 +113,7 @@ namespace Dochazka.Controllers
                 return NotFound();
             }
 
-            var contact = await _context.Contact.FindAsync(id);
+            var contact = await Context.Contact.FindAsync(id);
             if (contact == null)
             {
                 return NotFound();
@@ -97,8 +137,8 @@ namespace Dochazka.Controllers
             {
                 try
                 {
-                    _context.Update(contact);
-                    await _context.SaveChangesAsync();
+                    Context.Update(contact);
+                    await Context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -124,7 +164,7 @@ namespace Dochazka.Controllers
                 return NotFound();
             }
 
-            var contact = await _context.Contact
+            var contact = await Context.Contact
                 .FirstOrDefaultAsync(m => m.ContactId == id);
             if (contact == null)
             {
@@ -139,15 +179,15 @@ namespace Dochazka.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var contact = await _context.Contact.FindAsync(id);
-            _context.Contact.Remove(contact);
-            await _context.SaveChangesAsync();
+            var contact = await Context.Contact.FindAsync(id);
+            Context.Contact.Remove(contact);
+            await Context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool ContactExists(int id)
         {
-            return _context.Contact.Any(e => e.ContactId == id);
+            return Context.Contact.Any(e => e.ContactId == id);
         }
     }
 }
