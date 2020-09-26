@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Dochazka.Models;
 
 namespace Dochazka.Data
 {
@@ -12,5 +13,6 @@ namespace Dochazka.Data
             : base(options)
         {
         }
+        public DbSet<Dochazka.Models.Contact> Contact { get; set; }
     }
 }
