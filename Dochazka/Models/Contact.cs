@@ -19,6 +19,8 @@ namespace Dochazka.Models
         [DataType(DataType.EmailAddress)]
         public string Email { get; set; }
         public ContactStatus Status { get; set; }
+        [Timestamp]
+        public byte[] RowVersion { get; set; }
     }
 
     public enum ContactStatus

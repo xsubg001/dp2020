@@ -61,10 +61,29 @@
             <td>
                 @Html.DisplayFor(modelItem => item.Status)
             </td>
+            @*<td>
+            <a asp-action="Edit" asp-route-id="@item.ContactId">Edit</a> |
+            <a asp-action="Details" asp-route-id="@item.ContactId">Details</a> |
+            <a asp-action="Delete" asp-route-id="@item.ContactId">Delete</a>
+        </td>*@
             <td>
-                <a asp-action="Edit" asp-route-id="@item.ContactId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.ContactId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.ContactId">Delete</a>
+                @if ((await AuthorizationService.AuthorizeAsync(
+                User, item,
+                ContactOperations.Update)).Succeeded)
+                {
+                    <a asp-action="Edit" asp-route-id="@item.ContactId">Edit</a>
+                    <text> | </text>
+                }
+
+                <a asp-action="Details" asp-route-id="@item.ContactId">Details</a>
+
+                @if ((await AuthorizationService.AuthorizeAsync(
+                User, item,
+                ContactOperations.Delete)).Succeeded)
+                {
+                    <text> | </text>
+                    <a asp-action="Delete" asp-route-id="@item.ContactId">Delete</a>
+                }
             </td>
         </tr>
 }
