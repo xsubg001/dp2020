@@ -34,7 +34,7 @@ namespace Dochazka.Controllers
         {
             var contacts = from c in Context.Contact
                            select c;
-            
+
             var isAuthorized = User.IsInRole(Constants.ContactManagersRole) ||
                                User.IsInRole(Constants.ContactAdministratorsRole);
 
@@ -118,6 +118,16 @@ namespace Dochazka.Controllers
             {
                 return NotFound();
             }
+
+            var isAuthorized = await AuthorizationService.AuthorizeAsync(
+                                          User, contact,
+                                          ContactOperations.Update);
+
+            if (!isAuthorized.Succeeded)
+            {
+                return Forbid();
+            }
+
             return View(contact);
         }
 
@@ -128,32 +138,69 @@ namespace Dochazka.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("ContactId,Name,Address,City,State,Zip,Email")] Contact contact)
         {
-            if (id != contact.ContactId)
+            if (!ModelState.IsValid)
+            {
+                return View(contact);
+            }
+
+            // Fetch Contact from DB to get OwnerID.
+            var originalContact = await Context
+                .Contact.AsNoTracking()
+                .FirstOrDefaultAsync(m => m.ContactId == id);
+
+            if ((id != contact.ContactId) || (originalContact == null))
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            var isAuthorized = await AuthorizationService.AuthorizeAsync(
+                                         User, originalContact,
+                                         ContactOperations.Update);
+
+            if (!isAuthorized.Succeeded)
             {
-                try
-                {
-                    Context.Update(contact);
-                    await Context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ContactExists(contact.ContactId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                return Forbid();
             }
-            return View(contact);
+
+            contact.OwnerID = originalContact.OwnerID;
+
+            // Mark contact entity state as Modified, so that it can be updated in DB
+            Context.Attach(contact).State = EntityState.Modified;
+
+            if (contact.Status == ContactStatus.Approved)
+            {
+                // If the contact is updated after approval, 
+                // and the user cannot approve,
+                // set the status back to submitted so the update can be
+                // checked and approved.
+                var canApprove = await AuthorizationService.AuthorizeAsync(User,
+                                        contact,
+                                        ContactOperations.Approve);
+
+                if (!canApprove.Succeeded)
+                {
+                    contact.Status = ContactStatus.Submitted;
+                }
+            }
+
+            try
+            {
+                //Context.Update(contact);
+                await Context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ContactExists(contact.ContactId))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            return RedirectToAction(nameof(Index));
+            
         }
 
         // GET: Contacts/Delete/5
