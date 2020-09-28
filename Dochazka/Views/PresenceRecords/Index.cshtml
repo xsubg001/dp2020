@@ -1,0 +1,60 @@
+﻿@model IEnumerable<Dochazka.Models.PresenceRecord>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.WorkDay)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DayTimeSlot)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Employee.UserName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Presence)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ManagerApprovalStatus)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.WorkDay)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DayTimeSlot)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Employee.UserName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Presence)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ManagerApprovalStatus)
+            </td>
+            <td>
+                @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
+                @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
+                @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
