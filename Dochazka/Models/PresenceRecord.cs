@@ -43,23 +43,5 @@ namespace Dochazka.Models
     {
         Morning,
         Afternoon
-    }
-
-    public enum ManagerApprovalStatus
-    {
-        Submitted,
-        Approved,
-        Rejected
-    }
-
-    public enum PresenceState
-    {
-        Worktime,
-        PaidVacation,
-        UnpaidVacation,
-        DoctorSickness,
-        Sickleave,
-        Absence,
-        LegalJustification
-    }
+    }   
 }

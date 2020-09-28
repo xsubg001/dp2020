@@ -22,6 +22,7 @@ namespace Dochazka
             using (var scope = host.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
+                var logger = services.GetRequiredService<ILogger<Program>>();
 
                 try
                 {
@@ -36,19 +37,25 @@ namespace Dochazka
                     var testUserPw = config["SeedUserPW"];
 
                     SeedData.Initialize(services, testUserPw).Wait();
+                    logger.LogWarning("TestKey: {TestValue}", config["TestKey"]);
                 }
                 catch (Exception ex)
-                {
-                    var logger = services.GetRequiredService<ILogger<Program>>();
+                {                    
                     logger.LogError(ex, "An error occurred seeding the DB.");
-                }
+                }                
             }
+            
 
             host.Run();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                .ConfigureLogging(logging =>
+                {
+                    logging.ClearProviders();
+                    logging.AddConsole();
+                })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();

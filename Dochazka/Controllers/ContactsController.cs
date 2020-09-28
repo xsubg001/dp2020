@@ -32,13 +32,13 @@ namespace Dochazka.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
-            var contacts = from c in Context.Contact
+            var contacts = from c in _context.Contact
                            select c;
 
             var isAuthorized = User.IsInRole(Constants.ContactManagersRole) ||
                                User.IsInRole(Constants.ContactAdministratorsRole);
 
-            var currentUserId = UserManager.GetUserId(User);
+            var currentUserId = _userManager.GetUserId(User);
 
             // Only approved contacts are shown UNLESS you're authorized to see them
             // or you are the owner.
@@ -59,7 +59,7 @@ namespace Dochazka.Controllers
                 return NotFound();
             }           
 
-            var contact = await Context.Contact
+            var contact = await _context.Contact
                 .FirstOrDefaultAsync(m => m.ContactId == id);
 
             if (contact == null)
@@ -69,7 +69,7 @@ namespace Dochazka.Controllers
             var isAuthorized = User.IsInRole(Constants.ContactManagersRole) ||
                    User.IsInRole(Constants.ContactAdministratorsRole);
             
-            var currentUserId = UserManager.GetUserId(User);
+            var currentUserId = _userManager.GetUserId(User);
 
             if (!isAuthorized
                 && currentUserId != contact.OwnerID
@@ -88,7 +88,7 @@ namespace Dochazka.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Details(int id, ContactStatus status)
         {
-            var contact = await Context.Contact.FirstOrDefaultAsync(
+            var contact = await _context.Contact.FirstOrDefaultAsync(
                                           m => m.ContactId == id);
             if (contact == null)
             {
@@ -98,15 +98,15 @@ namespace Dochazka.Controllers
                                            ? ContactOperations.Approve
                                            : ContactOperations.Reject;
             
-            var isAuthorized = await AuthorizationService.AuthorizeAsync(User, contact,
+            var isAuthorized = await _authorizationService.AuthorizeAsync(User, contact,
                             contactOperation);
             if (!isAuthorized.Succeeded)
             {
                 return Forbid();
             }
             contact.Status = status;
-            Context.Contact.Update(contact);
-            await Context.SaveChangesAsync();
+            _context.Contact.Update(contact);
+            await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
         }
@@ -130,10 +130,10 @@ namespace Dochazka.Controllers
                 return View(contact);
             }
 
-            contact.OwnerID = UserManager.GetUserId(User);
+            contact.OwnerID = _userManager.GetUserId(User);
 
             // requires using ContactManager.Authorization;
-            var isAuthorized = await AuthorizationService.AuthorizeAsync(
+            var isAuthorized = await _authorizationService.AuthorizeAsync(
                                                         User, contact,
                                                         ContactOperations.Create);
 
@@ -142,8 +142,8 @@ namespace Dochazka.Controllers
                 return Forbid();
             }
 
-            Context.Add(contact);
-            await Context.SaveChangesAsync();
+            _context.Add(contact);
+            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
@@ -155,13 +155,13 @@ namespace Dochazka.Controllers
                 return NotFound();
             }
 
-            var contact = await Context.Contact.FindAsync(id);
+            var contact = await _context.Contact.FindAsync(id);
             if (contact == null)
             {
                 return NotFound();
             }
 
-            var isAuthorized = await AuthorizationService.AuthorizeAsync(
+            var isAuthorized = await _authorizationService.AuthorizeAsync(
                                           User, contact,
                                           ContactOperations.Update);
 
@@ -186,7 +186,7 @@ namespace Dochazka.Controllers
             }
 
             // Fetch Contact from DB to get OwnerID.
-            var contactToUpdate = await Context
+            var contactToUpdate = await _context
                 .Contact
                 .FirstOrDefaultAsync(m => m.ContactId == id);
 
@@ -199,7 +199,7 @@ namespace Dochazka.Controllers
                 return View(deletedContact);
             }
 
-            var isAuthorized = await AuthorizationService.AuthorizeAsync(
+            var isAuthorized = await _authorizationService.AuthorizeAsync(
                                          User, contactToUpdate,
                                          ContactOperations.Update);
 
@@ -208,7 +208,7 @@ namespace Dochazka.Controllers
                 return Forbid();
             }
 
-            Context.Entry(contactToUpdate).Property("RowVersion").OriginalValue = rowVersion;
+            _context.Entry(contactToUpdate).Property("RowVersion").OriginalValue = rowVersion;
 
             if (await TryUpdateModelAsync<Contact>(
                 contactToUpdate,
@@ -226,7 +226,7 @@ namespace Dochazka.Controllers
                     // and the user cannot approve,
                     // set the status back to submitted so the update can be
                     // checked and approved.
-                    var canApprove = await AuthorizationService.AuthorizeAsync(User,
+                    var canApprove = await _authorizationService.AuthorizeAsync(User,
                                             contactToUpdate,
                                             ContactOperations.Approve);
 
@@ -239,7 +239,7 @@ namespace Dochazka.Controllers
                 try
                 {
                     //Context.Update(contact);
-                    await Context.SaveChangesAsync();
+                    await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException ex)
@@ -302,7 +302,7 @@ namespace Dochazka.Controllers
                 return NotFound();
             }
 
-            var contact = await Context.Contact
+            var contact = await _context.Contact
                 .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.ContactId == id);
             if (contact == null)
@@ -314,7 +314,7 @@ namespace Dochazka.Controllers
                 return NotFound();
             }
 
-            var isAuthorized = await AuthorizationService.AuthorizeAsync(
+            var isAuthorized = await _authorizationService.AuthorizeAsync(
                                          User, contact,
                                          ContactOperations.Delete);
             
@@ -341,7 +341,7 @@ namespace Dochazka.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id, Contact contact)
         {
-            var originalContact = await Context
+            var originalContact = await _context
                 .Contact.AsNoTracking()
                 .FirstOrDefaultAsync(m => m.ContactId == id);
 
@@ -350,7 +350,7 @@ namespace Dochazka.Controllers
                 return NotFound();
             }
 
-            var isAuthorized = await AuthorizationService.AuthorizeAsync(
+            var isAuthorized = await _authorizationService.AuthorizeAsync(
                                          User, originalContact,
                                          ContactOperations.Delete);
 
@@ -361,8 +361,8 @@ namespace Dochazka.Controllers
 
             try
             {
-                Context.Contact.Remove(contact);
-                await Context.SaveChangesAsync();
+                _context.Contact.Remove(contact);
+                await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             catch (DbUpdateConcurrencyException)
@@ -374,7 +374,7 @@ namespace Dochazka.Controllers
 
         private bool ContactExists(int id)
         {
-            return Context.Contact.Any(e => e.ContactId == id);
+            return _context.Contact.Any(e => e.ContactId == id);
         }
     }
 }

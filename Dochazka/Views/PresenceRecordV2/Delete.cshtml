@@ -1,0 +1,52 @@
+﻿@model Dochazka.Models.PresenceRecordV2
+
+@{
+    ViewData["Title"] = "Delete";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Delete</h1>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>    
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.WorkDay)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.WorkDay)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Employee.UserName)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Employee.UserName)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.MorningPresence)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.MorningPresence)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.AfternoonPresence)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.AfternoonPresence)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.ManagerApprovalStatus)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.ManagerApprovalStatus)
+        </dd>
+    </dl>
+    
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="WorkDay" />
+        <input type="hidden" asp-for="EmployeeId" />
+        <input type="submit" value="Delete" class="btn btn-danger" /> |
+        <a asp-action="Index">Back to List</a>
+    </form>
+</div>

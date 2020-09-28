@@ -8,9 +8,9 @@ namespace Dochazka.Controllers
 {
     public abstract class DI_BaseController : Controller
     {
-        protected readonly ApplicationDbContext Context;
-        protected readonly IAuthorizationService AuthorizationService;
-        protected readonly UserManager<IdentityUser> UserManager;        
+        protected readonly ApplicationDbContext _context;
+        protected readonly IAuthorizationService _authorizationService;
+        protected readonly UserManager<IdentityUser> _userManager;        
 
         public DI_BaseController(
 
@@ -18,9 +18,9 @@ namespace Dochazka.Controllers
             IAuthorizationService authorizationService,
             UserManager<IdentityUser> userManager) : base()
         {
-            Context = context;
-            UserManager = userManager;
-            AuthorizationService = authorizationService;
+            _context = context;
+            _userManager = userManager;
+            _authorizationService = authorizationService;
         }
     }
 }

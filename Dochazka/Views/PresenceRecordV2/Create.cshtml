@@ -1,0 +1,52 @@
+﻿@model Dochazka.Models.PresenceRecordV2
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Create</h1>
+<h4>PresenceRecordV2</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="WorkDay" class="control-label"></label>
+                <input asp-for="WorkDay" class="form-control" value=@DateTime.Today.ToString("yyyy-MM-dd")/>
+                <span asp-validation-for="WorkDay" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="MorningPresence" class="control-label"></label>
+                <select asp-for="MorningPresence" class="form-control" asp-items="ViewBag.MorningPresence"></select>
+                <span asp-validation-for="MorningPresence" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="AfternoonPresence" class="control-label"></label>
+                <select asp-for="AfternoonPresence" class="form-control" asp-items="ViewBag.AfternoonPresence"></select>
+                <span asp-validation-for="AfternoonPresence" class="text-danger"></span>
+            </div>
+            @*<div class="form-group">
+                <label asp-for="EmployeeId" class="control-label"></label>
+                <select asp-for="EmployeeId" class ="form-control" asp-items="ViewBag.EmployeeId"></select>
+            </div>*@
+            @*<div class="form-group">
+                <label asp-for="ManagerApprovalStatus" class="control-label"></label>
+                <select asp-for="ManagerApprovalStatus" class="form-control"></select>
+                <span asp-validation-for="ManagerApprovalStatus" class="text-danger"></span>
+            </div>*@
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
