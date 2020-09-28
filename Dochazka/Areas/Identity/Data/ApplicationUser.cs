@@ -15,7 +15,11 @@ namespace Dochazka.Areas.Identity.Data
         {
             get
             {
-                return LastName + ", " + FirstName;
+                if (!string.IsNullOrEmpty(FirstName) || string.IsNullOrEmpty(LastName))
+                {
+                    return LastName + " " + FirstName;
+                }
+                return string.Empty;
             }
         }
     }
