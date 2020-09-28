@@ -56,7 +56,11 @@ namespace Dochazka.Areas.Identity.Pages.Account
             [DataType(DataType.Text)]
             [StringLength(50)]
             [Display(Name = "Last Name")]
-            public string LastName { get; set; }            
+            public string LastName { get; set; }
+
+            [DataType(DataType.Text)]
+            [Display(Name = "Manager UserName")]
+            public string ManagerId { get; set; }
 
             [Required]
             [EmailAddress]
@@ -90,6 +94,7 @@ namespace Dochazka.Areas.Identity.Pages.Account
                 var user = new ApplicationUser {
                     FirstName = Input.FirstName,
                     LastName = Input.LastName,
+                    ManagerId = Input.ManagerId,
                     UserName = Input.Email,
                     Email = Input.Email 
                 };

@@ -9,8 +9,7 @@ namespace Dochazka.Areas.Identity.Data
 
         public string FirstName { get; set; }
         public string LastName { get; set; }
-
-        [Display(Name = "Full Name")]
+        
         public string FullName
         {
             get
@@ -22,5 +21,11 @@ namespace Dochazka.Areas.Identity.Data
                 return string.Empty;
             }
         }
+
+        // user ID from AspNetUser table.
+        public string ManagerId { get; set; }
+
+        // navigation property
+        public ApplicationUser Manager { get; set; }
     }
 }

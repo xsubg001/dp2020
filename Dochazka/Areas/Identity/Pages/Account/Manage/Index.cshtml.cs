@@ -7,6 +7,7 @@ using Dochazka.Areas.Identity.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Dochazka.Areas.Identity.Pages.Account.Manage
 {
@@ -45,6 +46,10 @@ namespace Dochazka.Areas.Identity.Pages.Account.Manage
             [Display(Name = "Last Name")]
             public string LastName { get; set; }
 
+            [DataType(DataType.Text)]
+            [Display(Name = "Manager UserName")]
+            public string ManagerId { get; set; }
+
             [Phone]
             [Display(Name = "Phone number")]
             public string PhoneNumber { get; set; }
@@ -60,20 +65,22 @@ namespace Dochazka.Areas.Identity.Pages.Account.Manage
             Input = new InputModel
             {                
                 FirstName = user.FirstName,
-                LastName = user.LastName,                
+                LastName = user.LastName,
+                ManagerId = user.ManagerId,
                 PhoneNumber = phoneNumber
             };
         }
 
         public async Task<IActionResult> OnGetAsync()
         {
-            var user = await _userManager.GetUserAsync(User);
+            var user = await _userManager.GetUserAsync(User);            
             if (user == null)
             {
                 return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
             await LoadAsync(user);
+            ViewData["Managers"] = new SelectList(await _userManager.GetUsersInRoleAsync("ContactManagers"), "Id", "UserName");
             return Page();
         }
 
@@ -110,6 +117,11 @@ namespace Dochazka.Areas.Identity.Pages.Account.Manage
             if (Input.LastName != user.LastName)
             {
                 user.LastName = Input.LastName;
+            }
+
+            if (Input.ManagerId != user.ManagerId)
+            {
+                user.ManagerId = Input.ManagerId;
             }
 
             await _userManager.UpdateAsync(user);

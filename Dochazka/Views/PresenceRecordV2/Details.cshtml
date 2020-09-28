@@ -50,11 +50,17 @@
     </dl>
     <hr />
     <dl class="row">
-        <dt class="col-sm-2">
+        <dt class="col-sm-3">
             @Html.DisplayNameFor(model => model.ManagerApprovalStatus)
         </dt>
-        <dd class="col-sm-10">
+        <dd class="col-sm-9">
             @Html.DisplayFor(model => model.ManagerApprovalStatus)
+        </dd>
+        <dt class="col-sm-3">
+            Employee Manager
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Employee.Manager.FullName)
         </dd>
     </dl>
 </div>

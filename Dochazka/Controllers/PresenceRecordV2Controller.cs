@@ -43,7 +43,10 @@ namespace Dochazka.Controllers
                 return NotFound();
             }
 
-            var presenceRecordV2 = await _context.PresenceRecordsV2.Include(p => p.Employee).AsNoTracking().FirstOrDefaultAsync(p => p.EmployeeId == employeeId && p.WorkDay == workday);
+            var presenceRecordV2 = await _context.PresenceRecordsV2.Include(p => p.Employee)
+                                                                        .ThenInclude(m => m.Manager)
+                                                                   .AsNoTracking()
+                                                                   .FirstOrDefaultAsync(p => p.EmployeeId == employeeId && p.WorkDay == workday);
             if (presenceRecordV2 == null)
             {
                 return NotFound();
