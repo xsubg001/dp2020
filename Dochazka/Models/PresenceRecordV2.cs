@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Dochazka.Areas.Identity.Data;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -31,7 +32,7 @@ namespace Dochazka.Models
         public byte[] RowVersion { get; set; }
 
         // navigation property
-        public IdentityUser Employee { get; set; }
+        public ApplicationUser Employee { get; set; }
 
         public PresenceRecordV2()
         {            

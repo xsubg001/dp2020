@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Dochazka.Data;
 using Dochazka.Models;
@@ -11,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Identity;
 using Dochazka.Authorization;
+using Dochazka.Areas.Identity.Data;
 
 namespace Dochazka.Controllers
 {
@@ -22,7 +20,7 @@ namespace Dochazka.Controllers
             ILogger<ContactsController> logger,
             ApplicationDbContext context,
             IAuthorizationService authorizationService,
-            UserManager<IdentityUser> userManager)
+            UserManager<ApplicationUser> userManager)
             : base(context, authorizationService, userManager)
         {
             _logger = logger;

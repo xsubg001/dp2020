@@ -2,7 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Logging;
+using Dochazka.Areas.Identity.Data;
+
 
 namespace Dochazka.Controllers
 {
@@ -10,17 +11,17 @@ namespace Dochazka.Controllers
     {
         protected readonly ApplicationDbContext _context;
         protected readonly IAuthorizationService _authorizationService;
-        protected readonly UserManager<IdentityUser> _userManager;        
+        protected readonly UserManager<ApplicationUser> _userManager;        
 
         public DI_BaseController(
 
             ApplicationDbContext context,
             IAuthorizationService authorizationService,
-            UserManager<IdentityUser> userManager) : base()
+            UserManager<ApplicationUser> userManager) : base()
         {
-            _context = context;
-            _userManager = userManager;
+            _context = context;            
             _authorizationService = authorizationService;
+            _userManager = userManager;
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Dochazka.Models;
+﻿using Dochazka.Areas.Identity.Data;
+using Dochazka.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Identity;
@@ -9,9 +10,9 @@ namespace Dochazka.Authorization
     public class ContactIsOwnerAuthorizationHandler
                 : AuthorizationHandler<OperationAuthorizationRequirement, Contact>
     {
-        UserManager<IdentityUser> _userManager;
+        UserManager<ApplicationUser> _userManager;
 
-        public ContactIsOwnerAuthorizationHandler(UserManager<IdentityUser>
+        public ContactIsOwnerAuthorizationHandler(UserManager<ApplicationUser>
             userManager)
         {
             _userManager = userManager;

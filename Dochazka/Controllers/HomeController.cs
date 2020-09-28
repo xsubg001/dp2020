@@ -9,6 +9,7 @@ using Dochazka.Models;
 using Microsoft.AspNetCore.Authorization;
 using Dochazka.Data;
 using Microsoft.AspNetCore.Identity;
+using Dochazka.Areas.Identity.Data;
 
 namespace Dochazka.Controllers
 {
@@ -20,7 +21,7 @@ namespace Dochazka.Controllers
             ILogger<HomeController> logger, 
             ApplicationDbContext context,
             IAuthorizationService authorizationService,
-            UserManager<IdentityUser> userManager)
+            UserManager<ApplicationUser> userManager)
             : base(context, authorizationService, userManager)
         {
             _logger = logger;

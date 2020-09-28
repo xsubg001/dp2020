@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +10,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
-using System.Threading.Tasks.Dataflow;
+using Dochazka.Areas.Identity.Data;
 
 namespace Dochazka.Controllers
 {
@@ -23,7 +22,7 @@ namespace Dochazka.Controllers
             ILogger<PresenceRecordV2Controller> logger,
             ApplicationDbContext context,
             IAuthorizationService authorizationService,
-            UserManager<IdentityUser> userManager)
+            UserManager<ApplicationUser> userManager)
             : base(context, authorizationService, userManager)
         {
             _logger = logger;
@@ -80,16 +79,7 @@ namespace Dochazka.Controllers
 
             if (ModelState.IsValid)
             {
-                _context.Add(presenceRecordV2);
-                try
-                {
-
-                }
-                catch (DbUpdateException e)
-                {
-                    
-                    throw;
-                }
+                _context.Add(presenceRecordV2);                
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
