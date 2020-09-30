@@ -4,10 +4,12 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Dochazka.Areas.Identity.Data;
+using Dochazka.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 
 namespace Dochazka.Areas.Identity.Pages.Account.Manage
 {
@@ -15,13 +17,16 @@ namespace Dochazka.Areas.Identity.Pages.Account.Manage
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        protected readonly ApplicationDbContext _context;
 
         public IndexModel(
             UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager)
+            SignInManager<ApplicationUser> signInManager,
+            ApplicationDbContext context)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _context = context;
         }
 
         public string Username { get; set; }
@@ -36,19 +41,24 @@ namespace Dochazka.Areas.Identity.Pages.Account.Manage
         {
             [Required]
             [DataType(DataType.Text)]
-            [StringLength(50)]
+            [StringLength(50, ErrorMessage = "First name cannot be longer than 50 characters.")]
             [Display(Name = "First Name")]
             public string FirstName { get; set; }
 
             [Required]
             [DataType(DataType.Text)]
-            [StringLength(50)]
+            [StringLength(50, ErrorMessage = "First name cannot be longer than 50 characters.")]
             [Display(Name = "Last Name")]
             public string LastName { get; set; }
 
             [DataType(DataType.Text)]
             [Display(Name = "Manager UserName")]
             public string ManagerId { get; set; }
+
+            [Required]
+            [Display(Name = "Team Name")]
+            [StringLength(50, ErrorMessage = "First name cannot be longer than 50 characters.")]
+            public string TeamId { get; set; }
 
             [Phone]
             [Display(Name = "Phone number")]
@@ -67,6 +77,7 @@ namespace Dochazka.Areas.Identity.Pages.Account.Manage
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 ManagerId = user.ManagerId,
+                TeamId = user.TeamId,
                 PhoneNumber = phoneNumber
             };
         }
@@ -81,6 +92,7 @@ namespace Dochazka.Areas.Identity.Pages.Account.Manage
 
             await LoadAsync(user);
             ViewData["Managers"] = new SelectList(await _userManager.GetUsersInRoleAsync("ContactManagers"), "Id", "UserName");
+            ViewData["Teams"] = new SelectList(await _context.Teams.ToListAsync(), "Id", "TeamName");
             return Page();
         }
 
@@ -122,6 +134,11 @@ namespace Dochazka.Areas.Identity.Pages.Account.Manage
             if (Input.ManagerId != user.ManagerId)
             {
                 user.ManagerId = Input.ManagerId;
+            }
+
+            if (Input.TeamId != user.TeamId)
+            {
+                user.TeamId = Input.TeamId;
             }
 
             await _userManager.UpdateAsync(user);

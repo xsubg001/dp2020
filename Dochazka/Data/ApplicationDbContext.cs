@@ -13,6 +13,7 @@ namespace Dochazka.Data
         }
         public DbSet<Dochazka.Models.Contact> Contact { get; set; }
         public DbSet<PresenceRecordV2> PresenceRecordsV2 { get; set; }
+        public DbSet<Team> Teams { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -20,6 +21,11 @@ namespace Dochazka.Data
 
             modelBuilder.Entity<PresenceRecordV2>()
                 .HasKey(p => new { p.EmployeeId, p.WorkDay});
+
+            modelBuilder.Entity<Team>()
+                .HasIndex(t => t.TeamName)
+                .IsUnique();
+
         }
     }
 }
