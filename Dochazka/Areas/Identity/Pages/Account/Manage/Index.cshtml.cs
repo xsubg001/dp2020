@@ -92,7 +92,7 @@ namespace Dochazka.Areas.Identity.Pages.Account.Manage
 
             await LoadAsync(user);
             ViewData["Managers"] = new SelectList(await _userManager.GetUsersInRoleAsync("ContactManagers"), "Id", "UserName");
-            ViewData["Teams"] = new SelectList(await _context.Teams.ToListAsync(), "Id", "TeamName");
+            ViewData["Teams"] = new SelectList(await _context.Teams.ToListAsync(), "TeamID", "TeamName");
             return Page();
         }
 

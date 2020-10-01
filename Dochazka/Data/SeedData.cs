@@ -1,4 +1,5 @@
-﻿using Dochazka.Authorization;
+﻿using Dochazka.Areas.Identity.Data;
+using Dochazka.Authorization;
 using Dochazka.Data;
 using Dochazka.Models;
 using Microsoft.AspNetCore.Identity;
@@ -30,6 +31,14 @@ namespace ContactManager.Data
                 var managerID = await EnsureUser(serviceProvider, testUserPw, "manager@contoso.com");
                 await EnsureRole(serviceProvider, managerID, Constants.ContactManagersRole);
 
+                // allowed user can create and edit contacts that they create
+                var managerID2 = await EnsureUser(serviceProvider, testUserPw, "radimx@contoso.com");
+                await EnsureRole(serviceProvider, managerID2, Constants.ContactManagersRole);
+
+                // allowed user can create and edit contacts that they create
+                var managerID3 = await EnsureUser(serviceProvider, testUserPw, "radimx2@contoso.com");
+                await EnsureRole(serviceProvider, managerID3, Constants.ContactManagersRole);
+
                 SeedDB(context, "0");
             }
         }
@@ -37,12 +46,12 @@ namespace ContactManager.Data
         private static async Task<string> EnsureUser(IServiceProvider serviceProvider,
                                             string testUserPw, string UserName)
         {
-            var userManager = serviceProvider.GetService<UserManager<IdentityUser>>();
+            var userManager = serviceProvider.GetService<UserManager<ApplicationUser>>();
 
             var user = await userManager.FindByNameAsync(UserName);
             if (user == null)
             {
-                user = new IdentityUser
+                user = new ApplicationUser
                 {
                     UserName = UserName,
                     EmailConfirmed = true
@@ -74,7 +83,7 @@ namespace ContactManager.Data
                 IR = await roleManager.CreateAsync(new IdentityRole(role));
             }
 
-            var userManager = serviceProvider.GetService<UserManager<IdentityUser>>();
+            var userManager = serviceProvider.GetService<UserManager<ApplicationUser>>();
 
             var user = await userManager.FindByIdAsync(uid);
 

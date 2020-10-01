@@ -45,7 +45,7 @@ namespace Dochazka.Controllers
 
             var team = await _context.Teams
                 .Include(t => t.PrimaryManager)
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .FirstOrDefaultAsync(m => m.TeamID == id);
             if (team == null)
             {
                 return NotFound();
@@ -102,7 +102,7 @@ namespace Dochazka.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,TeamName,PrimaryManagerId")] Team team)
         {
-            if (id != team.Id)
+            if (id != team.TeamID)
             {
                 return NotFound();
             }
@@ -116,7 +116,7 @@ namespace Dochazka.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!TeamExists(team.Id))
+                    if (!TeamExists(team.TeamID))
                     {
                         return NotFound();
                     }
@@ -141,7 +141,7 @@ namespace Dochazka.Controllers
 
             var team = await _context.Teams
                 .Include(t => t.PrimaryManager)
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .FirstOrDefaultAsync(m => m.TeamID == id);
             if (team == null)
             {
                 return NotFound();
@@ -163,7 +163,7 @@ namespace Dochazka.Controllers
 
         private bool TeamExists(int id)
         {
-            return _context.Teams.Any(e => e.Id == id);
+            return _context.Teams.Any(e => e.TeamID == id);
         }
     }
 }
