@@ -57,10 +57,11 @@
             @Html.DisplayFor(model => model.ManagerApprovalStatus)
         </dd>
         <dt class="col-sm-3">
-            Employee Manager
+            Employee Manager Name
         </dt>
         <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.Employee.Manager.FullName)
+            @*@ViewBag.employeeTeam.PrimaryManager.FullName*@
+            @Html.DisplayFor(model => model.Employee.Team.PrimaryManager.FullName)
         </dd>
     </dl>
 </div>

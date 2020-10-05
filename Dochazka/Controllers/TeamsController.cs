@@ -45,7 +45,7 @@ namespace Dochazka.Controllers
 
             var team = await _context.Teams
                 .Include(t => t.PrimaryManager)
-                .FirstOrDefaultAsync(m => m.TeamID == id);
+                .FirstOrDefaultAsync(m => m.TeamId == id);
             if (team == null)
             {
                 return NotFound();
@@ -66,7 +66,7 @@ namespace Dochazka.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,TeamName,PrimaryManagerId")] Team team)
+        public async Task<IActionResult> Create([Bind("TeamID,TeamName,PrimaryManagerId")] Team team)
         {
             if (ModelState.IsValid)
             {
@@ -100,9 +100,9 @@ namespace Dochazka.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,TeamName,PrimaryManagerId")] Team team)
+        public async Task<IActionResult> Edit(int id, [Bind("TeamId,TeamName,PrimaryManagerId")] Team team)
         {
-            if (id != team.TeamID)
+            if (id != team.TeamId)
             {
                 return NotFound();
             }
@@ -116,7 +116,7 @@ namespace Dochazka.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!TeamExists(team.TeamID))
+                    if (!TeamExists(team.TeamId))
                     {
                         return NotFound();
                     }
@@ -141,7 +141,7 @@ namespace Dochazka.Controllers
 
             var team = await _context.Teams
                 .Include(t => t.PrimaryManager)
-                .FirstOrDefaultAsync(m => m.TeamID == id);
+                .FirstOrDefaultAsync(m => m.TeamId == id);
             if (team == null)
             {
                 return NotFound();
@@ -163,7 +163,7 @@ namespace Dochazka.Controllers
 
         private bool TeamExists(int id)
         {
-            return _context.Teams.Any(e => e.TeamID == id);
+            return _context.Teams.Any(e => e.TeamId == id);
         }
     }
 }

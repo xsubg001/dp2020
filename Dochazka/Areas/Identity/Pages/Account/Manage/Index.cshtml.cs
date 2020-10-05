@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dochazka.Areas.Identity.Data;
 using Dochazka.Data;
+using Dochazka.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -51,14 +52,10 @@ namespace Dochazka.Areas.Identity.Pages.Account.Manage
             [Display(Name = "Last Name")]
             public string LastName { get; set; }
 
-            [DataType(DataType.Text)]
-            [Display(Name = "Manager UserName")]
-            public string ManagerId { get; set; }
-
-            [Required]
             [Display(Name = "Team Name")]
-            [StringLength(50, ErrorMessage = "First name cannot be longer than 50 characters.")]
-            public string TeamId { get; set; }
+            public Team Team { get; set; }
+
+            public int? TeamId { get; set; }
 
             [Phone]
             [Display(Name = "Phone number")]
@@ -71,37 +68,52 @@ namespace Dochazka.Areas.Identity.Pages.Account.Manage
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
 
             Username = userName;
+            await LoadUserTeam(user);
 
             Input = new InputModel
             {                
                 FirstName = user.FirstName,
-                LastName = user.LastName,
-                ManagerId = user.ManagerId,
-                TeamId = user.TeamId,
+                LastName = user.LastName,        
+                Team = user.Team,
                 PhoneNumber = phoneNumber
             };
         }
 
         public async Task<IActionResult> OnGetAsync()
         {
-            var user = await _userManager.GetUserAsync(User);            
+            var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
                 return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
             await LoadAsync(user);
-            ViewData["Managers"] = new SelectList(await _userManager.GetUsersInRoleAsync("ContactManagers"), "Id", "UserName");
-            ViewData["Teams"] = new SelectList(await _context.Teams.ToListAsync(), "TeamID", "TeamName");
+            ViewData["Teams"] = new SelectList(await _context.Teams.ToListAsync(), "TeamId", "TeamName", Input.Team.TeamId);
             return Page();
+        }
+
+        private async Task LoadUserTeam(ApplicationUser user)
+        {
+            var expandedUser = await _context.Users.Include(u => u.Team).FirstOrDefaultAsync(u => u.Id == user.Id);
+            user.Team = expandedUser.Team;
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
             var user = await _userManager.GetUserAsync(User);
+
             if (user == null)
             {
                 return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+            }
+            await LoadUserTeam(user);
+
+            if (Input.TeamId != null)
+            {
+                Input.Team = await _context.Teams.FindAsync(Input.TeamId);
+            }
+            else {
+                Input.Team = null;
             }
 
             if (!ModelState.IsValid)
@@ -131,14 +143,9 @@ namespace Dochazka.Areas.Identity.Pages.Account.Manage
                 user.LastName = Input.LastName;
             }
 
-            if (Input.ManagerId != user.ManagerId)
+            if (Input.Team.TeamId != user.Team.TeamId)
             {
-                user.ManagerId = Input.ManagerId;
-            }
-
-            if (Input.TeamId != user.TeamId)
-            {
-                user.TeamId = Input.TeamId;
+                user.Team = Input.Team;
             }
 
             await _userManager.UpdateAsync(user);

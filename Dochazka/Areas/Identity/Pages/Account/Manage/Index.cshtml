@@ -11,6 +11,7 @@
     <div class="col-md-6">
         <form id="profile-form" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Input.Team" />
             <div class="form-group">
                 <label asp-for="Username"></label>
                 <input asp-for="Username" class="form-control" disabled />
@@ -24,14 +25,7 @@
                 <input asp-for="Input.LastName" class="form-control" />
             </div>
             <div class="form-group">
-                <label asp-for="Input.ManagerId"></label>
-                @*<input asp-for="Input.ManagerId" class="form-control" />*@
-                <select asp-for="Input.ManagerId" class="form-control" asp-items="ViewBag.Managers"></select>
-                <span asp-validation-for="Input.ManagerId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
                 <label asp-for="Input.TeamId"></label>
-                @*<input asp-for="Input.ManagerId" class="form-control" />*@
                 <select asp-for="Input.TeamId" class="form-control" asp-items="ViewBag.Teams"></select>
                 <span asp-validation-for="Input.TeamId" class="text-danger"></span>
             </div>

@@ -4,16 +4,14 @@ using Dochazka.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace Dochazka.Data.Migrations
+namespace Dochazka.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20200928204340_addingManager")]
-    partial class addingManager
+    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
     {
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -52,9 +50,6 @@ namespace Dochazka.Data.Migrations
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<string>("ManagerId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("NormalizedEmail")
                         .HasColumnType("nvarchar(256)")
                         .HasMaxLength(256);
@@ -75,6 +70,9 @@ namespace Dochazka.Data.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("TeamId")
+                        .HasColumnType("int");
+
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
 
@@ -84,8 +82,6 @@ namespace Dochazka.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ManagerId");
-
                     b.HasIndex("NormalizedEmail")
                         .HasName("EmailIndex");
 
@@ -93,6 +89,8 @@ namespace Dochazka.Data.Migrations
                         .IsUnique()
                         .HasName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.HasIndex("TeamId");
 
                     b.ToTable("AspNetUsers");
                 });
@@ -163,6 +161,31 @@ namespace Dochazka.Data.Migrations
                     b.HasKey("EmployeeId", "WorkDay");
 
                     b.ToTable("PresenceRecordsV2");
+                });
+
+            modelBuilder.Entity("Dochazka.Models.Team", b =>
+                {
+                    b.Property<int>("TeamId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("PrimaryManagerId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("TeamName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(50);
+
+                    b.HasKey("TeamId");
+
+                    b.HasIndex("PrimaryManagerId");
+
+                    b.HasIndex("TeamName")
+                        .IsUnique();
+
+                    b.ToTable("Teams");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -302,9 +325,9 @@ namespace Dochazka.Data.Migrations
 
             modelBuilder.Entity("Dochazka.Areas.Identity.Data.ApplicationUser", b =>
                 {
-                    b.HasOne("Dochazka.Areas.Identity.Data.ApplicationUser", "Manager")
-                        .WithMany()
-                        .HasForeignKey("ManagerId");
+                    b.HasOne("Dochazka.Models.Team", "Team")
+                        .WithMany("TeamMembers")
+                        .HasForeignKey("TeamId");
                 });
 
             modelBuilder.Entity("Dochazka.Models.PresenceRecordV2", b =>
@@ -314,6 +337,13 @@ namespace Dochazka.Data.Migrations
                         .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Dochazka.Models.Team", b =>
+                {
+                    b.HasOne("Dochazka.Areas.Identity.Data.ApplicationUser", "PrimaryManager")
+                        .WithMany()
+                        .HasForeignKey("PrimaryManagerId");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
