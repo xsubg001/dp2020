@@ -31,7 +31,7 @@ namespace Dochazka.Controllers
         // GET: Teams
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Teams.Include(t => t.PrimaryManager);
+            var applicationDbContext = _context.Teams.Include(t => t.PrimaryManager);                                                     
             return View(await applicationDbContext.ToListAsync());
         }
 
@@ -67,7 +67,14 @@ namespace Dochazka.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("TeamID,TeamName,PrimaryManagerId")] Team team)
-        {
+        { 
+            if (_context.Teams.AsNoTracking().Any(t => t.TeamName.ToLower() == team.TeamName.ToLower()))
+            {
+                ModelState.AddModelError(string.Empty, "Unable to save team with this Team Name. The team with the same team name already exists. "
+                                                     + "Please give a different name to the new team.");
+                PopulateViewDataWithSelectedItems(team);
+                return View(team);
+            }
             if (ModelState.IsValid)
             {
                 _context.Add(team);
@@ -164,6 +171,16 @@ namespace Dochazka.Controllers
         private bool TeamExists(int id)
         {
             return _context.Teams.Any(e => e.TeamId == id);
+        }
+
+        /// <summary>
+        /// Populates VieData values
+        /// </summary>
+        /// <param name="presenceRecordV2"></param>
+        private void PopulateViewDataWithSelectedItems(Team team)
+        {            
+            ViewData["TeamName"] = team.TeamName;
+            ViewData["PrimaryManagerId"] = new SelectList(_userManager.GetUsersInRoleAsync("ContactManagers").Result, "Id", "UserName", team.PrimaryManagerId);
         }
     }
 }

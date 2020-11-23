@@ -88,7 +88,7 @@ namespace Dochazka.Areas.Identity.Pages.Account.Manage
             }
 
             await LoadAsync(user);
-            ViewData["Teams"] = new SelectList(await _context.Teams.ToListAsync(), "TeamId", "TeamName", Input.Team.TeamId);
+            ViewData["Teams"] = new SelectList(await _context.Teams.ToListAsync(), "TeamId", "TeamName", Input.Team?.TeamId ?? default(int)  );
             return Page();
         }
 

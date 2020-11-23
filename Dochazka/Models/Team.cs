@@ -18,10 +18,17 @@ namespace Dochazka.Models
         public string TeamName { get; set; }
 
         // navigation property, user ID from AspNetUser table.        
-        public string PrimaryManagerId { get; set; }        
+        public string PrimaryManagerId { get; set; }
+
+        [Display(Name = "Team Manager")]
         public ApplicationUser PrimaryManager { get; set; }
 
         [InverseProperty("Team")]
         public List<ApplicationUser> TeamMembers { get; set; }
+    }
+
+    public class TeamConstants
+    {
+        public static readonly string TeamManagerUserName = "Team Manager Username";        
     }
 }

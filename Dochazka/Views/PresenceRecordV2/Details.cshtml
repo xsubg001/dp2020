@@ -36,6 +36,12 @@
             @Html.DisplayFor(model => model.Employee.Id)
         </dd>
         <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Employee.Team.TeamName)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Employee.Team.TeamName)
+        </dd>
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.MorningPresence)
         </dt>
         <dd class="col-sm-10">

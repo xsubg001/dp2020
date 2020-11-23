@@ -45,7 +45,7 @@ namespace Dochazka.Controllers
 
             var presenceRecordV2 = await _context.PresenceRecordsV2.Include(p => p.Employee)    
                                                                         .ThenInclude(e => e.Team)
-                                                                            .ThenInclude(t => t.PrimaryManager)
+                                                                            .ThenInclude(t => t.PrimaryManager)                                                                        
                                                                    .FirstOrDefaultAsync(p => p.EmployeeId == employeeId && p.WorkDay == workday);
 
             //ViewData["employeeTeam"]  = await _context.Teams.FindAsync(presenceRecordV2.Employee.TeamId);
