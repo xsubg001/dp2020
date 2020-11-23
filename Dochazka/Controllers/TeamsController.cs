@@ -57,7 +57,7 @@ namespace Dochazka.Controllers
         // GET: Teams/Create
         public IActionResult Create()
         {
-            ViewData["PrimaryManagerId"] = new SelectList(_userManager.GetUsersInRoleAsync("ContactManagers").Result, "Id", "UserName");
+            ViewData["PrimaryManagerId"] = new SelectList(GetUnassignedManagersAsync().Result, "Id", "UserName");
             return View();
         }
 
@@ -81,7 +81,7 @@ namespace Dochazka.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["PrimaryManagerId"] = new SelectList(_userManager.GetUsersInRoleAsync("ContactManagers").Result, "Id", "UserName", team.PrimaryManagerId);
+            ViewData["PrimaryManagerId"] = new SelectList(GetUnassignedManagersAsync().Result, "Id", "UserName", team.PrimaryManagerId);
             return View(team);
         }
 
@@ -98,7 +98,7 @@ namespace Dochazka.Controllers
             {
                 return NotFound();
             }
-            ViewData["PrimaryManagerId"] = new SelectList(_userManager.GetUsersInRoleAsync("ContactManagers").Result, "Id", "UserName", team.PrimaryManagerId);
+            ViewData["PrimaryManagerId"] = new SelectList(GetUnassignedManagersAsync().Result, "Id", "UserName", team.PrimaryManagerId);
             return View(team);
         }
 
@@ -134,7 +134,7 @@ namespace Dochazka.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["PrimaryManagerId"] = new SelectList(_userManager.GetUsersInRoleAsync("ContactManagers").Result, "Id", "UserName", team.PrimaryManagerId);
+            ViewData["PrimaryManagerId"] = new SelectList(GetUnassignedManagersAsync().Result, "Id", "UserName", team.PrimaryManagerId);
             return View(team);
         }
 
@@ -174,13 +174,27 @@ namespace Dochazka.Controllers
         }
 
         /// <summary>
-        /// Populates VieData values
+        /// Helper method: Populates VieData values
         /// </summary>
         /// <param name="presenceRecordV2"></param>
         private void PopulateViewDataWithSelectedItems(Team team)
         {            
             ViewData["TeamName"] = team.TeamName;
-            ViewData["PrimaryManagerId"] = new SelectList(_userManager.GetUsersInRoleAsync("ContactManagers").Result, "Id", "UserName", team.PrimaryManagerId);
+            ViewData["PrimaryManagerId"] = new SelectList(GetUnassignedManagersAsync().Result, "Id", "UserName", team.PrimaryManagerId);
+        }
+
+        /// <summary>
+        /// Helper method: Returns list of managers, which have no team assigned yet.
+        /// </summary>
+        /// <returns></returns>
+        private async Task<IList<ApplicationUser>> GetUnassignedManagersAsync()
+        {
+            var allManagers = _userManager.GetUsersInRoleAsync("ContactManagers").Result;
+            var assignedManagerIds = await _context.Teams
+                                .Include(t => t.PrimaryManager)
+                                .Select(pm => pm.PrimaryManagerId)
+                                .ToListAsync();
+            return allManagers.Where(m => !assignedManagerIds.Contains(m.Id)).ToList();
         }
     }
 }

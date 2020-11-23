@@ -110,16 +110,6 @@ namespace Dochazka.Controllers
             return View(presenceRecordV2);
         }
 
-        /// <summary>
-        /// Prepares ViewData and pre-selects last selection
-        /// </summary>
-        /// <param name="presenceRecordV2"></param>
-        private void PopulateViewDataWithSelectedItems(PresenceRecordV2 presenceRecordV2)
-        {
-            ViewData["EmployeeId"] = new SelectList(_context.Users, "Id", "UserName", presenceRecordV2.EmployeeId);
-            ViewData["MorningPresence"] = new SelectList(Enum.GetNames(typeof(PresenceState)), presenceRecordV2.MorningPresence);
-            ViewData["AfternoonPresence"] = new SelectList(Enum.GetNames(typeof(PresenceState)), presenceRecordV2.AfternoonPresence);
-        }
 
         // POST: PresenceRecordV2/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for 
@@ -204,9 +194,27 @@ namespace Dochazka.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        /// <summary>
+        /// Helper method: Checks if any presence record with the same userId and workday already exists
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="workday"></param>
+        /// <returns></returns>
         private bool PresenceRecordV2Exists(string id, DateTime workday)
         {
             return _context.PresenceRecordsV2.Any(e => e.EmployeeId == id && e.WorkDay == workday);
+        }
+
+
+        /// <summary>
+        /// Helper method: Prepares ViewData and pre-selects last selection
+        /// </summary>
+        /// <param name="presenceRecordV2"></param>
+        private void PopulateViewDataWithSelectedItems(PresenceRecordV2 presenceRecordV2)
+        {
+            ViewData["EmployeeId"] = new SelectList(_context.Users, "Id", "UserName", presenceRecordV2.EmployeeId);
+            ViewData["MorningPresence"] = new SelectList(Enum.GetNames(typeof(PresenceState)), presenceRecordV2.MorningPresence);
+            ViewData["AfternoonPresence"] = new SelectList(Enum.GetNames(typeof(PresenceState)), presenceRecordV2.AfternoonPresence);
         }
     }
 }
