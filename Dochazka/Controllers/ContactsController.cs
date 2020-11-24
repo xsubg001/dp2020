@@ -33,8 +33,8 @@ namespace Dochazka.Controllers
             var contacts = from c in _context.Contact
                            select c;
 
-            var isAuthorized = User.IsInRole(Constants.ContactManagersRole) ||
-                               User.IsInRole(Constants.ContactAdministratorsRole);
+            var isAuthorized = User.IsInRole(Roles.ContactManagersRole.ToString()) ||
+                               User.IsInRole(Roles.ContactAdministratorsRole.ToString());
 
             var currentUserId = _userManager.GetUserId(User);
 
@@ -64,8 +64,8 @@ namespace Dochazka.Controllers
             {
                 return NotFound();
             }
-            var isAuthorized = User.IsInRole(Constants.ContactManagersRole) ||
-                   User.IsInRole(Constants.ContactAdministratorsRole);
+            var isAuthorized = User.IsInRole(Roles.ContactManagersRole.ToString()) ||
+                   User.IsInRole(Roles.ContactAdministratorsRole.ToString());
             
             var currentUserId = _userManager.GetUserId(User);
 

@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Dochazka.Data;
 using Dochazka.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
@@ -19,7 +20,7 @@ namespace Dochazka.Authorization
             }
 
             // Administrators can do anything.
-            if (context.User.IsInRole(Constants.ContactAdministratorsRole))
+            if (context.User.IsInRole(Roles.ContactAdministratorsRole.ToString()))
             {
                 context.Succeed(requirement);
             }

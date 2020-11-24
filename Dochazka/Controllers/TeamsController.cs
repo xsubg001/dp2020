@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Dochazka.Controllers
 {
+    [Authorize(Roles = "TeamAdministratorRole")]
     public class TeamsController : DI_BaseController
     {
         private readonly ILogger<TeamsController> _logger;
@@ -189,7 +190,7 @@ namespace Dochazka.Controllers
         /// <returns></returns>
         private async Task<IList<ApplicationUser>> GetUnassignedManagersAsync()
         {
-            var allManagers = _userManager.GetUsersInRoleAsync("ContactManagers").Result;
+            var allManagers = _userManager.GetUsersInRoleAsync("TeamManagerRole").Result;
             var assignedManagerIds = await _context.Teams
                                 .Include(t => t.PrimaryManager)
                                 .Select(pm => pm.PrimaryManagerId)

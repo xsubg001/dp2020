@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Dochazka.Data;
 using Dochazka.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
@@ -27,7 +28,7 @@ namespace Dochazka.Authorization
             }
 
             // Managers can approve or reject.
-            if (context.User.IsInRole(Constants.ContactManagersRole))
+            if (context.User.IsInRole(Roles.ContactManagersRole.ToString()))
             {
                 context.Succeed(requirement);
             }

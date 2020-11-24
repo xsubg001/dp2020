@@ -24,36 +24,32 @@ namespace ContactManager.Data
                 // dotnet user-secrets set SeedUserPW <pw>
                 // The admin user can do anything
 
-                var adminID = await EnsureUser(serviceProvider, testUserPw, "admin@contoso.com");
-                await EnsureRole(serviceProvider, adminID, Constants.ContactAdministratorsRole);
+                foreach (var role in Enum.GetNames(typeof(Roles)))
+                {
+                    await CreateRole(serviceProvider, role);
+                }
 
-                // allowed user can create and edit contacts that they create
-                var managerID = await EnsureUser(serviceProvider, testUserPw, "manager@contoso.com");
-                await EnsureRole(serviceProvider, managerID, Constants.ContactManagersRole);
-
-                // allowed user can create and edit contacts that they create
-                var managerID2 = await EnsureUser(serviceProvider, testUserPw, "radimx@contoso.com");
-                await EnsureRole(serviceProvider, managerID2, Constants.ContactManagersRole);
-
-                // allowed user can create and edit contacts that they create
-                var managerID3 = await EnsureUser(serviceProvider, testUserPw, "radimx2@contoso.com");
-                await EnsureRole(serviceProvider, managerID3, Constants.ContactManagersRole);
+                var adminID = await EnsureUser(serviceProvider, testUserPw, "admin@contoso.com", "Gabriela", "Cimoradska");
+                await EnsureRole(serviceProvider, adminID, Roles.TeamAdministratorRole.ToString());
 
                 SeedDB(context, "0");
             }
         }
 
         private static async Task<string> EnsureUser(IServiceProvider serviceProvider,
-                                            string testUserPw, string UserName)
+                                            string testUserPw, string userName, string firstName, string lastName)
         {
             var userManager = serviceProvider.GetService<UserManager<ApplicationUser>>();
 
-            var user = await userManager.FindByNameAsync(UserName);
+            var user = await userManager.FindByNameAsync(userName);
             if (user == null)
             {
                 user = new ApplicationUser
                 {
-                    UserName = UserName,
+                    UserName = userName,
+                    Email = userName,
+                    FirstName = firstName,
+                    LastName = lastName,
                     EmailConfirmed = true
                 };
                 await userManager.CreateAsync(user, testUserPw);
@@ -96,6 +92,25 @@ namespace ContactManager.Data
 
             return IR;
         }
+
+        private static async Task<IdentityResult> CreateRole(IServiceProvider serviceProvider, string role)
+        {
+            IdentityResult IR = null;
+            var roleManager = serviceProvider.GetService<RoleManager<IdentityRole>>();
+
+            if (roleManager == null)
+            {
+                throw new Exception("roleManager null");
+            }
+
+            if (!await roleManager.RoleExistsAsync(role))
+            {
+                IR = await roleManager.CreateAsync(new IdentityRole(role));
+            }
+
+            return IR;
+        }
+
 
         public static void SeedDB(ApplicationDbContext context, string adminID)
         {

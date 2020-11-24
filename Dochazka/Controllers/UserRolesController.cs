@@ -6,14 +6,13 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Dochazka.Controllers
 {
-    [Authorize(Roles = "ContactAdministrators")]
+    [Authorize(Roles = "TeamAdministratorRole")]
     public class UserRolesController : DI_BaseController
     {        
         private readonly RoleManager<IdentityRole> _roleManager;
