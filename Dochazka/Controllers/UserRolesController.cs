@@ -1,8 +1,11 @@
 ﻿using Dochazka.Areas.Identity.Data;
+using Dochazka.Data;
 using Dochazka.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,14 +13,19 @@ using System.Threading.Tasks;
 
 namespace Dochazka.Controllers
 {
-    public class UserRolesController : Controller
-    {
-        private readonly UserManager<ApplicationUser> _userManager;
+    [Authorize(Roles = "ContactAdministrators")]
+    public class UserRolesController : DI_BaseController
+    {        
         private readonly RoleManager<IdentityRole> _roleManager;
-        public UserRolesController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+        private readonly ILogger<UserRolesController> _logger;
+        public UserRolesController(
+            ILogger<UserRolesController> logger,
+            UserManager<ApplicationUser> userManager,
+            RoleManager<IdentityRole> roleManager,
+            ApplicationDbContext context,
+            IAuthorizationService authorizationService) : base(context, authorizationService, userManager)
         {
-            _roleManager = roleManager;
-            _userManager = userManager;
+            _roleManager = roleManager;            
         }
         public async Task<IActionResult> Index()
         {
@@ -25,26 +33,20 @@ namespace Dochazka.Controllers
             var userRolesViewModel = new List<UserRolesViewModel>();
             foreach (ApplicationUser user in users)
             {
-                var thisViewModel = new UserRolesViewModel();
-                thisViewModel.UserId = user.Id;
-                thisViewModel.Email = user.Email;
-                thisViewModel.FirstName = user.FirstName;
-                thisViewModel.LastName = user.LastName;
-                thisViewModel.Roles = await GetUserRoles(user);
-                userRolesViewModel.Add(thisViewModel);
+                UserRolesViewModel userRoleViewModel = await BuildUserRoleViewModel(user);
+                userRolesViewModel.Add(userRoleViewModel);
             }
             return View(userRolesViewModel);
         }
 
-
-        public async Task<IActionResult> Manage(string userId)
+        public async Task<IActionResult> Manage(string id)
         {
-            ViewBag.userId = userId;
-            var user = await _userManager.FindByIdAsync(userId);
+            ViewBag.id = id;
+            var user = await _userManager.FindByIdAsync(id);
             if (user == null)
             {
-                ViewBag.ErrorMessage = $"User with Id = {userId} cannot be found";
-                return View("NotFound");
+                ViewBag.ErrorMessage = $"User with Id = {id} cannot be found";
+                return NotFound();
             }
             ViewBag.UserName = user.UserName;
             var model = new List<ManageUserRolesViewModel>();
@@ -70,12 +72,13 @@ namespace Dochazka.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> Manage(List<ManageUserRolesViewModel> model, string userId)
+        public async Task<IActionResult> Manage(List<ManageUserRolesViewModel> model, string id)
         {
-            var user = await _userManager.FindByIdAsync(userId);
+            var user = await _userManager.FindByIdAsync(id);
             if (user == null)
             {
-                return View();
+                ViewBag.ErrorMessage = $"User with Id = {id} cannot be found";
+                return NotFound();
             }
             var roles = await _userManager.GetRolesAsync(user);
             var result = await _userManager.RemoveFromRolesAsync(user, roles);
@@ -93,10 +96,61 @@ namespace Dochazka.Controllers
             return RedirectToAction("Index");
         }
 
-
-        private async Task<List<string>> GetUserRoles(ApplicationUser user)
+        // GET: UserRoles/Delete/5
+        public async Task<IActionResult> Delete(string id)
         {
-            return new List<string>(await _userManager.GetRolesAsync(user));
+            ViewBag.id = id;
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                ViewBag.ErrorMessage = $"User with Id = {id} cannot be found";
+                return NotFound();
+            }                   
+
+            return View(BuildUserRoleViewModel(user).Result);
+        }
+
+        // POST: UserRoles/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(string id, UserRolesViewModel user)
+        {
+            var originalUser = await _userManager.FindByIdAsync(id);
+            if ((id != user.Id) || (originalUser == null))
+            {
+                ViewBag.ErrorMessage = $"User with Id = {id} cannot be found or user Id mistmatch";
+                return View(user);
+            }
+
+            try
+            {
+                var roles = await _userManager.GetRolesAsync(originalUser);
+                var result = await _userManager.RemoveFromRolesAsync(originalUser, roles);
+                if (!result.Succeeded)
+                {                    
+                    ViewBag.ErrorMessage = "Cannot remove user existing roles";
+                    return View(user);
+                }
+                result = await _userManager.DeleteAsync(originalUser);
+                return RedirectToAction(nameof(Index));
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                //Log the error (uncomment ex variable name and write a log.)
+                return RedirectToAction(nameof(Delete), new { id = user.Id, concurrencyError = true });
+            }
+        }        
+
+        private async Task<UserRolesViewModel> BuildUserRoleViewModel(ApplicationUser user)
+        {
+            var userRoleViewModel = new UserRolesViewModel();
+            userRoleViewModel.Id = user.Id;
+            userRoleViewModel.Email = user.Email;
+            userRoleViewModel.FullName = user.FullName;
+            userRoleViewModel.UserName = user.UserName;
+            userRoleViewModel.Roles = new List<string>(await _userManager.GetRolesAsync(user));
+            userRoleViewModel.ConcurrencyStamp = user.ConcurrencyStamp;
+            return userRoleViewModel;
         }
     }
 }
