@@ -9,8 +9,12 @@
 <p class="text-danger">@ViewData["ConcurrencyErrorMessage"]</p>
 <p class="text-danger">@ViewData["ErrorMessage"]</p>
 
-<h3>Are you sure you want to delete this user?</h3>
-<div>    
+@if (Model.CanBeDeleted)
+{
+    <h3>Are you sure you want to delete this user?</h3>
+}
+
+<div>
     <hr />
     <dl class="row">
         <dt class="col-sm-2">
@@ -35,11 +39,15 @@
     </dl>
 
     <form asp-action="Delete">
-        <input type="hidden" asp-for="Id" />
-        <input type="hidden" asp-for="ConcurrencyStamp" />        
-        <input type="hidden" asp-for="FullName" />
-        <input type="hidden" asp-for="UserName" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
+        @if (Model.CanBeDeleted)
+        {
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="ConcurrencyStamp" />
+            <input type="hidden" asp-for="FullName" />
+            <input type="hidden" asp-for="UserName" />
+            <input type="submit" value="Delete" class="btn btn-danger" />
+            <text> | </text>
+        }
         <a asp-action="Index">Back to List</a>
     </form>
 </div>

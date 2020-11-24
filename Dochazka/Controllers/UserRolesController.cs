@@ -105,7 +105,15 @@ namespace Dochazka.Controllers
             {
                 ViewBag.ErrorMessage = $"User with Id = {id} cannot be found";
                 return NotFound();
-            }                   
+            }            
+            var teamAssignments = await _context.Teams
+                                .Include(t => t.PrimaryManager).Where(t => t.PrimaryManagerId == id)
+                                .ToListAsync();            
+            if (teamAssignments.Count > 0)
+            {
+                ViewBag.ErrorMessage = $"User with Id = {id} is assigned as manager for the team {teamAssignments.First().TeamName} and can't be deleted until unassigned.";
+                return View(BuildUserRoleViewModel(user, false).Result);
+            }
 
             return View(BuildUserRoleViewModel(user).Result);
         }
@@ -141,7 +149,7 @@ namespace Dochazka.Controllers
             }
         }        
 
-        private async Task<UserRolesViewModel> BuildUserRoleViewModel(ApplicationUser user)
+        private async Task<UserRolesViewModel> BuildUserRoleViewModel(ApplicationUser user, bool canBeDeleted = true)
         {
             var userRoleViewModel = new UserRolesViewModel();
             userRoleViewModel.Id = user.Id;
@@ -150,6 +158,7 @@ namespace Dochazka.Controllers
             userRoleViewModel.UserName = user.UserName;
             userRoleViewModel.Roles = new List<string>(await _userManager.GetRolesAsync(user));
             userRoleViewModel.ConcurrencyStamp = user.ConcurrencyStamp;
+            userRoleViewModel.CanBeDeleted = canBeDeleted;
             return userRoleViewModel;
         }
     }

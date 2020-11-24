@@ -16,6 +16,7 @@ namespace Dochazka.Models
         public string Email { get; set; }
         public string ConcurrencyStamp { get; set; }
         public IEnumerable<string> Roles { get; set; }
+        public bool CanBeDeleted { get; set; }
 
     }
 }
