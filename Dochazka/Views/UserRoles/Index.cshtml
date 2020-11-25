@@ -10,8 +10,9 @@
 <table class="table table-striped">
     <thead>
         <tr>
-            <th>FullName</th>            
+            <th>FullName</th>
             <th>Email</th>
+            <th>TeamName</th>
             <th>Roles</th>
             <th>Action</th>
         </tr>
@@ -20,12 +21,12 @@
         @foreach (var user in Model)
         {
         <tr>
-            <td>@user.FullName</td>            
+            <td>@user.FullName</td>
             <td>@user.Email</td>
-            <td>@string.Join(" , ", user.Roles.ToList())</td>            
+            <td>@user.TeamName</td>
+            <td>@string.Join(" , ", user.Roles.ToList())</td>
             <td>
                 @Html.ActionLink("Manage Roles", "Manage", new { user.Id }) |
-                @Html.ActionLink("Details", "Details", new { user.Id }) |
                 @Html.ActionLink("Delete", "Delete", new { user.Id })
             </td>
         </tr>

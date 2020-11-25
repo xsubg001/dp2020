@@ -143,7 +143,7 @@ namespace Dochazka.Areas.Identity.Pages.Account.Manage
                 user.LastName = Input.LastName;
             }
 
-            if (Input.Team.TeamId != user.Team.TeamId)
+            if (Input.Team.TeamId != user.Team?.TeamId)
             {
                 user.Team = Input.Team;
             }

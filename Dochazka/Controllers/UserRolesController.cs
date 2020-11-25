@@ -28,7 +28,7 @@ namespace Dochazka.Controllers
         }
         public async Task<IActionResult> Index()
         {
-            var users = await _userManager.Users.ToListAsync();
+            var users = await _userManager.Users.Include(u => u.Team).ToListAsync();
             var userRolesViewModel = new List<UserRolesViewModel>();
             foreach (ApplicationUser user in users)
             {
@@ -111,10 +111,10 @@ namespace Dochazka.Controllers
             if (teamAssignments.Count > 0)
             {
                 ViewBag.ErrorMessage = $"User with Id = {id} is assigned as manager for the team {teamAssignments.First().TeamName} and can't be deleted until unassigned.";
-                return View(BuildUserRoleViewModel(user, false).Result);
+                return View(await BuildUserRoleViewModel(user, false));
             }
 
-            return View(BuildUserRoleViewModel(user).Result);
+            return View(await BuildUserRoleViewModel(user));
         }
 
         // POST: UserRoles/Delete/5
@@ -155,6 +155,7 @@ namespace Dochazka.Controllers
             userRoleViewModel.Email = user.Email;
             userRoleViewModel.FullName = user.FullName;
             userRoleViewModel.UserName = user.UserName;
+            userRoleViewModel.TeamName = user.Team?.TeamName;
             userRoleViewModel.Roles = new List<string>(await _userManager.GetRolesAsync(user));
             userRoleViewModel.ConcurrencyStamp = user.ConcurrencyStamp;
             userRoleViewModel.CanBeDeleted = canBeDeleted;

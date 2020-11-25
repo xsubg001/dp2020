@@ -31,6 +31,35 @@
         </dd>
     </dl>
 </div>
+<hr />
+<h4>Team members</h4>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.PrimaryManager.FullName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PrimaryManager.UserName)
+            </th>            
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var teamMember in ViewBag.teamMembers)
+        {
+        <tr>
+            <td>
+                @teamMember.FullName
+            </td>
+            <td>
+                @teamMember.UserName
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>
+
 <div>
     <a asp-action="Edit" asp-route-id="@Model.TeamId">Edit</a> |
     <a asp-action="Index">Back to List</a>

@@ -52,13 +52,14 @@ namespace Dochazka.Controllers
                 return NotFound();
             }
 
+            ViewBag.teamMembers = await _userManager.Users.Where(u => u.Team.TeamId == id).ToListAsync();
             return View(team);
         }
 
         // GET: Teams/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            ViewData["PrimaryManagerId"] = new SelectList(GetUnassignedManagersAsync().Result, "Id", "UserName");
+            ViewData["PrimaryManagerId"] = new SelectList(await GetUnassignedManagersAsync(), "Id", "UserName");
             return View();
         }
 
@@ -82,7 +83,7 @@ namespace Dochazka.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["PrimaryManagerId"] = new SelectList(GetUnassignedManagersAsync().Result, "Id", "UserName", team.PrimaryManagerId);
+            ViewData["PrimaryManagerId"] = new SelectList(await GetUnassignedManagersAsync(), "Id", "UserName", team.PrimaryManagerId);
             return View(team);
         }
 
@@ -99,7 +100,7 @@ namespace Dochazka.Controllers
             {
                 return NotFound();
             }
-            ViewData["PrimaryManagerId"] = new SelectList(GetUnassignedManagersAsync().Result, "Id", "UserName", team.PrimaryManagerId);
+            ViewData["PrimaryManagerId"] = new SelectList(await GetUnassignedManagersForEditAsync(team.PrimaryManagerId), "Id", "UserName", team.PrimaryManagerId);
             return View(team);
         }
 
@@ -135,7 +136,7 @@ namespace Dochazka.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["PrimaryManagerId"] = new SelectList(GetUnassignedManagersAsync().Result, "Id", "UserName", team.PrimaryManagerId);
+            ViewData["PrimaryManagerId"] = new SelectList(await GetUnassignedManagersForEditAsync(team.PrimaryManagerId), "Id", "UserName", team.PrimaryManagerId);
             return View(team);
         }
 
@@ -155,6 +156,17 @@ namespace Dochazka.Controllers
                 return NotFound();
             }
 
+            var teamMembers = await _userManager.Users.Where(u => u.Team.TeamId == id).ToListAsync();
+            
+            if (teamMembers.Count > 0)
+            {
+                ViewBag.ErrorMessage = $"There are still {teamMembers.Count} team members assigned to this team. The team must have no members before it can be deleted.";
+                ViewBag.CanBeDeleted = false;
+            }
+            else
+            {
+                ViewBag.CanBeDeleted = true;
+            }
             return View(team);
         }
 
@@ -190,12 +202,19 @@ namespace Dochazka.Controllers
         /// <returns></returns>
         private async Task<IList<ApplicationUser>> GetUnassignedManagersAsync()
         {
-            var allManagers = _userManager.GetUsersInRoleAsync("TeamManagerRole").Result;
+            var allManagers = await _userManager.GetUsersInRoleAsync("TeamManagerRole");
             var assignedManagerIds = await _context.Teams
                                 .Include(t => t.PrimaryManager)
                                 .Select(pm => pm.PrimaryManagerId)
                                 .ToListAsync();
             return allManagers.Where(m => !assignedManagerIds.Contains(m.Id)).ToList();
+        }
+
+        private async Task<IList<ApplicationUser>> GetUnassignedManagersForEditAsync(string id)
+        {
+            var result = await GetUnassignedManagersAsync();
+            result.Add(await _userManager.FindByIdAsync(id));
+            return result;
         }
     }
 }
