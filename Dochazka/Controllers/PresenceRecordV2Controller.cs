@@ -31,7 +31,8 @@ namespace Dochazka.Controllers
         // GET: PresenceRecordV2
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.PresenceRecordsV2.Include(p => p.Employee);
+            var currentUserId = _userManager.GetUserId(User);
+            var applicationDbContext = _context.PresenceRecordsV2.Include(p => p.Employee).Where(p => p.EmployeeId == currentUserId);
             return View(await applicationDbContext.ToListAsync());
         }
 
