@@ -41,8 +41,7 @@ namespace Dochazka.Controllers
         }
 
         public async Task<IActionResult> Manage(string id)
-        {
-            ViewBag.id = id;            
+        {                 
             var user = await _context.Users.Include(u => u.Team).FirstOrDefaultAsync(u => u.Id == id);            
             if (user == null)
             {
@@ -54,7 +53,9 @@ namespace Dochazka.Controllers
                 UserId = user.Id,
                 TeamId = user.Team.TeamId
             };
-            ViewBag.Teams  = new SelectList(await _context.Teams.ToListAsync(), "TeamId", "TeamName", model.TeamId ?? default(int));
+            ViewBag.Teams = new SelectList(await _context.Teams.ToListAsync(), "TeamId", "TeamName", model.TeamId ?? default(int));
+            ViewBag.UserName = user.UserName;
+
 
             foreach (var role in _roleManager.Roles)
             {

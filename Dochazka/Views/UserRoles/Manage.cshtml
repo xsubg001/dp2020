@@ -6,13 +6,13 @@
 <form action="Manage" method="Post">
     <div class="card">
         <div class="card-header">
-            <h2>Manage User Roles</h2>
-            Add/Remove Roles for User / @ViewBag.UserName.
+            <h1>Manage user</h1>            
+            <h4>@ViewBag.UserName</h4>
         </div>
         <div class="card-body">
             <input type="hidden" asp-for="@Model.UserId" />
             <div class="form-group">
-                <label asp-for="@Model.TeamId"></label>
+                <label asp-for="@Model.TeamId">TeamName</label>
                 <select asp-for="@Model.TeamId" class="form-control" asp-items="ViewBag.Teams"></select>
                 <span asp-validation-for="@Model.TeamId" class="text-danger"></span>
             </div>
