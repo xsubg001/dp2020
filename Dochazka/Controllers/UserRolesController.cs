@@ -4,8 +4,10 @@ using Dochazka.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualBasic;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -40,57 +42,78 @@ namespace Dochazka.Controllers
 
         public async Task<IActionResult> Manage(string id)
         {
-            ViewBag.id = id;
-            var user = await _userManager.FindByIdAsync(id);
+            ViewBag.id = id;            
+            var user = await _context.Users.Include(u => u.Team).FirstOrDefaultAsync(u => u.Id == id);            
             if (user == null)
             {
                 ViewBag.ErrorMessage = $"User with Id = {id} cannot be found";
                 return NotFound();
             }
-            ViewBag.UserName = user.UserName;
-            var model = new List<ManageUserRolesViewModel>();
+            var model = new ManageUserViewModel
+            { 
+                UserId = user.Id,
+                TeamId = user.Team.TeamId
+            };
+            ViewBag.Teams  = new SelectList(await _context.Teams.ToListAsync(), "TeamId", "TeamName", model.TeamId ?? default(int));
+
             foreach (var role in _roleManager.Roles)
             {
-                var userRolesViewModel = new ManageUserRolesViewModel
+                var roleSelection = new RoleSelection
                 {
                     RoleId = role.Id,
                     RoleName = role.Name
                 };
                 if (await _userManager.IsInRoleAsync(user, role.Name))
                 {
-                    userRolesViewModel.Selected = true;
+                    roleSelection.Selected = true;
                 }
                 else
                 {
-                    userRolesViewModel.Selected = false;
+                    roleSelection.Selected = false;
                 }
-                model.Add(userRolesViewModel);
-            }
+                model.RoleSelections.Add(roleSelection);
+            }            
+
             return View(model);
         }
 
 
         [HttpPost]
-        public async Task<IActionResult> Manage(List<ManageUserRolesViewModel> model, string id)
+        public async Task<IActionResult> Manage(ManageUserViewModel input, string id)
         {
-            var user = await _userManager.FindByIdAsync(id);
+            var user = await _userManager.FindByIdAsync(input.UserId);
             if (user == null)
             {
-                ViewBag.ErrorMessage = $"User with Id = {id} cannot be found";
+                ViewBag.ErrorMessage = $"User with Id = {input.UserId} cannot be found";
                 return NotFound();
             }
+
+            if (input.TeamId != null)
+            {
+                user.Team = await _context.Teams.FindAsync(input.TeamId);
+            }
+            else
+            {
+                user.Team = await _context.Teams.Where(t => t.TeamName == CommonConstants.DEFAULT_TEAM ).FirstOrDefaultAsync();
+            }
+
+            if (input.TeamId != user.Team?.TeamId)
+            {                
+                await _userManager.UpdateAsync(user);
+            }
+
             var roles = await _userManager.GetRolesAsync(user);
             var result = await _userManager.RemoveFromRolesAsync(user, roles);
             if (!result.Succeeded)
             {
                 ModelState.AddModelError("", "Cannot remove user existing roles");
-                return View(model);
+                return View(input);
             }
-            result = await _userManager.AddToRolesAsync(user, model.Where(x => x.Selected).Select(y => y.RoleName));
+            result = await _userManager.AddToRolesAsync(user, input.RoleSelections.Where(x => x.Selected).Select(y => y.RoleName));
             if (!result.Succeeded)
             {
                 ModelState.AddModelError("", "Cannot add selected roles to user");
-                return View(model);
+                return View(input);
             }
             return RedirectToAction("Index");
         }

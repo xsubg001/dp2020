@@ -5,10 +5,7 @@ using System.Threading.Tasks;
 
 namespace Dochazka.Models
 {
-    /// <summary>
-    /// Model which helps to manage user roles in UserRolesController
-    /// </summary>
-    public class ManageUserRolesViewModel
+    public class RoleSelection
     {
         public string RoleId { get; set; }
         public string RoleName { get; set; }

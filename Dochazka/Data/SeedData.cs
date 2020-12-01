@@ -31,7 +31,8 @@ namespace ContactManager.Data
 
                 var adminID = await EnsureUser(serviceProvider, testUserPw, "admin@contoso.com", "Gabriela", "Cimoradska");
                 await EnsureRole(serviceProvider, adminID, Roles.TeamAdministratorRole.ToString());
-
+                await EnsureRole(serviceProvider, adminID, Roles.TeamManagerRole.ToString());
+                await EnsureRole(serviceProvider, adminID, Roles.TeamMemberRole.ToString());
                 SeedDB(context, "0");
             }
         }

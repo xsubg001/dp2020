@@ -103,7 +103,7 @@ namespace Dochazka.Areas.Identity.Pages.Account
                 Input.Team = await _context.Teams.FindAsync(Input.TeamId);
             }
             else {
-                Input.Team = null;
+                Input.Team = await _context.Teams.Where(t => t.TeamName == CommonConstants.DEFAULT_TEAM ).FirstOrDefaultAsync();
             }
 
             if (ModelState.IsValid)

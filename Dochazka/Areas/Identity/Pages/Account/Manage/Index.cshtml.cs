@@ -113,7 +113,7 @@ namespace Dochazka.Areas.Identity.Pages.Account.Manage
                 Input.Team = await _context.Teams.FindAsync(Input.TeamId);
             }
             else {
-                Input.Team = null;
+                Input.Team = await _context.Teams.Where(t => t.TeamName == CommonConstants.DEFAULT_TEAM ).FirstOrDefaultAsync();
             }
 
             if (!ModelState.IsValid)
@@ -143,7 +143,7 @@ namespace Dochazka.Areas.Identity.Pages.Account.Manage
                 user.LastName = Input.LastName;
             }
 
-            if (Input.Team.TeamId != user.Team?.TeamId)
+            if (Input.Team?.TeamId != user.Team?.TeamId)
             {
                 user.Team = Input.Team;
             }

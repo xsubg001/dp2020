@@ -1,23 +1,29 @@
-﻿@model List<ManageUserRolesViewModel>
+﻿@model ManageUserViewModel
 @{
     ViewData["Title"] = "Manage";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<form method="Post">
+<form action="Manage" method="Post">
     <div class="card">
         <div class="card-header">
             <h2>Manage User Roles</h2>
             Add/Remove Roles for User / @ViewBag.UserName.
         </div>
         <div class="card-body">
-            @for (int i = 0; i < Model.Count; i++)
+            <input type="hidden" asp-for="@Model.UserId" />
+            <div class="form-group">
+                <label asp-for="@Model.TeamId"></label>
+                <select asp-for="@Model.TeamId" class="form-control" asp-items="ViewBag.Teams"></select>
+                <span asp-validation-for="@Model.TeamId" class="text-danger"></span>
+            </div>
+            @for (int i = 0; i < Model.RoleSelections.Count; i++)
             {
-                <div class="form-check m-1">
-                    <input type="hidden" asp-for="@Model[i].RoleId" />
-                    <input type="hidden" asp-for="@Model[i].RoleName" />
-                    <input asp-for="@Model[i].Selected" class="form-check-input" />
-                    <label class="form-check-label" asp-for="@Model[i].Selected">
-                        @Model[i].RoleName
+                <div class="form-check">
+                    <input type="hidden" asp-for="@Model.RoleSelections[i].RoleId" />
+                    <input type="hidden" asp-for="@Model.RoleSelections[i].RoleName" />
+                    <input asp-for="@Model.RoleSelections[i].Selected" class="form-check-input" />
+                    <label class="form-check-label" asp-for="@Model.RoleSelections[i].Selected">
+                        @Model.RoleSelections[i].RoleName
                     </label>
                 </div>
             }
