@@ -1,4 +1,4 @@
-﻿@model Dochazka.Models.PresenceRecordV2
+﻿@model Dochazka.Models.AttendanceRecord
 
 @{
     ViewData["Title"] = "Create";
@@ -6,7 +6,7 @@
 }
 
 <h1>Create</h1>
-<h4>PresenceRecordV2</h4>
+<h4>Attendance Record</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -18,14 +18,14 @@
                 <span asp-validation-for="WorkDay" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="MorningPresence" class="control-label"></label>
-                <select asp-for="MorningPresence" class="form-control" asp-items="ViewBag.MorningPresence"></select>
-                <span asp-validation-for="MorningPresence" class="text-danger"></span>
+                <label asp-for="MorningAttendance" class="control-label"></label>
+                <select asp-for="MorningAttendance" class="form-control" asp-items="ViewBag.MorningAttendance"></select>
+                <span asp-validation-for="MorningAttendance" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="AfternoonPresence" class="control-label"></label>
-                <select asp-for="AfternoonPresence" class="form-control" asp-items="ViewBag.AfternoonPresence"></select>
-                <span asp-validation-for="AfternoonPresence" class="text-danger"></span>
+                <label asp-for="AfternoonAttendance" class="control-label"></label>
+                <select asp-for="AfternoonAttendance" class="form-control" asp-items="ViewBag.AfternoonAttendance"></select>
+                <span asp-validation-for="AfternoonAttendance" class="text-danger"></span>
             </div>
             @*<div class="form-group">
                 <label asp-for="EmployeeId" class="control-label"></label>

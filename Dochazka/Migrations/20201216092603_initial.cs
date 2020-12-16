@@ -125,19 +125,19 @@ namespace Dochazka.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PresenceRecordsV2",
+                name: "AttendanceRecords",
                 columns: table => new
                 {
                     WorkDay = table.Column<DateTime>(nullable: false),
                     EmployeeId = table.Column<string>(nullable: false),
-                    MorningPresence = table.Column<int>(nullable: false),
-                    AfternoonPresence = table.Column<int>(nullable: false),
+                    MorningAttendance = table.Column<int>(nullable: false),
+                    AfternoonAttendance = table.Column<int>(nullable: false),
                     ManagerApprovalStatus = table.Column<int>(nullable: false),
                     RowVersion = table.Column<byte[]>(rowVersion: true, nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PresenceRecordsV2", x => new { x.EmployeeId, x.WorkDay });
+                    table.PrimaryKey("PK_AttendanceRecords", x => new { x.EmployeeId, x.WorkDay });
                 });
 
             migrationBuilder.CreateTable(
@@ -147,8 +147,7 @@ namespace Dochazka.Migrations
                     TeamId = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     TeamName = table.Column<string>(maxLength: 50, nullable: false),
-                    PrimaryManagerId = table.Column<string>(nullable: true),
-                    PrimaryManagerId1 = table.Column<string>(nullable: true)
+                    PrimaryManagerId = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -176,7 +175,7 @@ namespace Dochazka.Migrations
                     AccessFailedCount = table.Column<int>(nullable: false),
                     FirstName = table.Column<string>(nullable: true),
                     LastName = table.Column<string>(nullable: true),
-                    TeamId = table.Column<int>(nullable: false)
+                    TeamId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -186,7 +185,7 @@ namespace Dochazka.Migrations
                         column: x => x.TeamId,
                         principalTable: "Teams",
                         principalColumn: "TeamId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
@@ -234,9 +233,9 @@ namespace Dochazka.Migrations
                 column: "TeamId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Teams_PrimaryManagerId1",
+                name: "IX_Teams_PrimaryManagerId",
                 table: "Teams",
-                column: "PrimaryManagerId1");
+                column: "PrimaryManagerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Teams_TeamName",
@@ -277,17 +276,17 @@ namespace Dochazka.Migrations
                 onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_PresenceRecordsV2_AspNetUsers_EmployeeId",
-                table: "PresenceRecordsV2",
+                name: "FK_AttendanceRecords_AspNetUsers_EmployeeId",
+                table: "AttendanceRecords",
                 column: "EmployeeId",
                 principalTable: "AspNetUsers",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Teams_AspNetUsers_PrimaryManagerId1",
+                name: "FK_Teams_AspNetUsers_PrimaryManagerId",
                 table: "Teams",
-                column: "PrimaryManagerId1",
+                column: "PrimaryManagerId",
                 principalTable: "AspNetUsers",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Restrict);
@@ -296,7 +295,7 @@ namespace Dochazka.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Teams_AspNetUsers_PrimaryManagerId1",
+                name: "FK_Teams_AspNetUsers_PrimaryManagerId",
                 table: "Teams");
 
             migrationBuilder.DropTable(
@@ -315,10 +314,10 @@ namespace Dochazka.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Contact");
+                name: "AttendanceRecords");
 
             migrationBuilder.DropTable(
-                name: "PresenceRecordsV2");
+                name: "Contact");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

@@ -187,9 +187,9 @@ namespace Dochazka.Controllers
         }
 
         /// <summary>
-        /// Helper method: Populates VieData values
+        /// Populates VieData with team name information
         /// </summary>
-        /// <param name="presenceRecordV2"></param>
+        /// <param name="team"></param>
         private void PopulateViewDataWithSelectedItems(Team team)
         {            
             ViewData["TeamName"] = team.TeamName;

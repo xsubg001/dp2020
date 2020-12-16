@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Dochazka.Models
 {
-    public enum PresenceState
+    public enum Attendance
     {
         WorkingTime,
         PaidVacation,

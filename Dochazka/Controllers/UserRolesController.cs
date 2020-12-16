@@ -1,5 +1,6 @@
 ﻿using Dochazka.Areas.Identity.Data;
 using Dochazka.Data;
+using Dochazka.HelperClasses;
 using Dochazka.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualBasic;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -28,8 +30,23 @@ namespace Dochazka.Controllers
         {
             _roleManager = roleManager;            
         }
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string sortOrder, string currentFilter, string searchString, int? pageNumber)
         {
+            ViewData["CurrentSort"] = sortOrder;
+            ViewData["NameSortParm"] = string.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewData["TeamSortParm"] = sortOrder == "team" ? "team_desc" : "team";
+
+            if (searchString != null)
+            {
+                pageNumber = 1;
+            }
+            else
+            {
+                searchString = currentFilter;
+            }
+
+            ViewData["CurrentFilter"] = searchString;
+
             var users = await _userManager.Users.Include(u => u.Team).ToListAsync();
             var userRolesViewModel = new List<UserRolesViewModel>();
             foreach (ApplicationUser user in users)
@@ -37,7 +54,30 @@ namespace Dochazka.Controllers
                 UserRolesViewModel userRoleViewModel = await BuildUserRoleViewModel(user);
                 userRolesViewModel.Add(userRoleViewModel);
             }
-            return View(userRolesViewModel);
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                userRolesViewModel = userRolesViewModel.Where(u => u.FullName.ToLower().Contains(searchString.ToLower())).ToList();
+            }
+
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    userRolesViewModel = userRolesViewModel.OrderByDescending(u => u.FullName).ToList();
+                    break;
+                case "team":
+                    userRolesViewModel = userRolesViewModel.OrderBy(u => u.TeamName).ToList();
+                    break;
+                case "team_desc":
+                    userRolesViewModel = userRolesViewModel.OrderByDescending(u => u.TeamName).ToList();
+                    break;
+                default:
+                    userRolesViewModel = userRolesViewModel.OrderBy(u => u.FullName).ToList();
+                    break;
+            }
+
+            return View(PaginatedList<UserRolesViewModel>.Create(userRolesViewModel.AsQueryable(), pageNumber ?? 1, CommonConstants.PAGE_SIZE));
+            //return View(userRolesViewModel);
         }
 
         public async Task<IActionResult> Manage(string id)

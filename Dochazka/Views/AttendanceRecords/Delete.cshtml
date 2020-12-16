@@ -1,4 +1,4 @@
-﻿@model Dochazka.Models.PresenceRecordV2
+﻿@model Dochazka.Models.AttendanceRecord
 
 @{
     ViewData["Title"] = "Delete";
@@ -24,16 +24,16 @@
             @Html.DisplayFor(model => model.Employee.UserName)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.MorningPresence)
+            @Html.DisplayNameFor(model => model.MorningAttendance)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.MorningPresence)
+            @Html.DisplayFor(model => model.MorningAttendance)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.AfternoonPresence)
+            @Html.DisplayNameFor(model => model.AfternoonAttendance)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.AfternoonPresence)
+            @Html.DisplayFor(model => model.AfternoonAttendance)
         </dd>
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.ManagerApprovalStatus)

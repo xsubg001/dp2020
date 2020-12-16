@@ -33,9 +33,11 @@ namespace ContactManager.Data
                 await EnsureRole(serviceProvider, adminID, Roles.TeamAdministratorRole.ToString());
                 await EnsureRole(serviceProvider, adminID, Roles.TeamManagerRole.ToString());
                 await EnsureRole(serviceProvider, adminID, Roles.TeamMemberRole.ToString());
+                await InitDefaultTeam(serviceProvider, context, CommonConstants.DEFAULT_TEAM, adminID);
                 SeedDB(context, "0");
             }
         }
+
 
         private static async Task<string> EnsureUser(IServiceProvider serviceProvider,
                                             string testUserPw, string userName, string firstName, string lastName)
@@ -110,6 +112,35 @@ namespace ContactManager.Data
             }
 
             return IR;
+        }
+
+
+        private static async Task<bool> InitDefaultTeam(IServiceProvider serviceProvider, ApplicationDbContext context, string teamName, string primaryManagerId)
+        {
+            var userManager = serviceProvider.GetService<UserManager<ApplicationUser>>();
+
+            var user = await userManager.FindByIdAsync(primaryManagerId);
+            if (!(context.Teams.Any(t => t.TeamName == teamName)))
+            {
+                var team = context.Teams.Add(
+                    new Team
+                    {
+                        TeamName = teamName,
+                        PrimaryManagerId = primaryManagerId,
+                        PrimaryManager = user
+                    }
+                );
+                context.SaveChanges();
+            }
+
+            var defaultTeam = context.Teams.Where(t => t.TeamName == teamName && t.PrimaryManagerId == primaryManagerId).First();
+
+            if (user.Team == null)
+            {
+                user.Team = defaultTeam;                
+                await userManager.UpdateAsync(user);
+            }
+            return true;
         }
 
 

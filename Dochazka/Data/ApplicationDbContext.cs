@@ -12,14 +12,14 @@ namespace Dochazka.Data
         {
         }
         public DbSet<Dochazka.Models.Contact> Contact { get; set; }
-        public DbSet<PresenceRecordV2> PresenceRecordsV2 { get; set; }
+        public DbSet<AttendanceRecord> AttendanceRecords { get; set; }
         public DbSet<Team> Teams { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<PresenceRecordV2>()
+            modelBuilder.Entity<AttendanceRecord>()
                 .HasKey(p => new { p.EmployeeId, p.WorkDay});
 
             modelBuilder.Entity<Team>()

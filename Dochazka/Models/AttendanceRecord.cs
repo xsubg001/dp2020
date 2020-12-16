@@ -10,18 +10,18 @@ using System.Threading.Tasks;
 
 namespace Dochazka.Models
 {
-    public class PresenceRecordV2
+    public class AttendanceRecord
     {
 
         [Display(Name = "Work Day Date"), DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:dd-MM-yyyy}", ApplyFormatInEditMode = false)]
         public DateTime WorkDay { get; set; }
 
-        [Display(Name = "Morning Presence")]
-        public PresenceState MorningPresence { get; set; }
+        [Display(Name = "Morning Attendance")]
+        public Attendance MorningAttendance { get; set; }
 
-        [Display(Name = "Afternoon Presence")]
-        public PresenceState AfternoonPresence { get; set; }
+        [Display(Name = "Afternoon Attendance")]
+        public Attendance AfternoonAttendance { get; set; }
 
         // user ID from AspNetUser table.
         public string EmployeeId { get; set; }
@@ -34,9 +34,9 @@ namespace Dochazka.Models
         // navigation property
         public ApplicationUser Employee { get; set; }
 
-        public PresenceRecordV2()
+        public AttendanceRecord()
         {            
-            AfternoonPresence = MorningPresence = PresenceState.Absence;
+            AfternoonAttendance = MorningAttendance = Attendance.Absence;
             ManagerApprovalStatus = ManagerApprovalStatus.Submitted;
         }
     }           

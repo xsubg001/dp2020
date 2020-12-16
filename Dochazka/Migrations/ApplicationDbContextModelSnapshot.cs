@@ -95,6 +95,33 @@ namespace Dochazka.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
+            modelBuilder.Entity("Dochazka.Models.AttendanceRecord", b =>
+                {
+                    b.Property<string>("EmployeeId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("WorkDay")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("AfternoonAttendance")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ManagerApprovalStatus")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MorningAttendance")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.HasKey("EmployeeId", "WorkDay");
+
+                    b.ToTable("AttendanceRecords");
+                });
+
             modelBuilder.Entity("Dochazka.Models.Contact", b =>
                 {
                     b.Property<int>("ContactId")
@@ -134,33 +161,6 @@ namespace Dochazka.Migrations
                     b.HasKey("ContactId");
 
                     b.ToTable("Contact");
-                });
-
-            modelBuilder.Entity("Dochazka.Models.PresenceRecordV2", b =>
-                {
-                    b.Property<string>("EmployeeId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("WorkDay")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("AfternoonPresence")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ManagerApprovalStatus")
-                        .HasColumnType("int");
-
-                    b.Property<int>("MorningPresence")
-                        .HasColumnType("int");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.HasKey("EmployeeId", "WorkDay");
-
-                    b.ToTable("PresenceRecordsV2");
                 });
 
             modelBuilder.Entity("Dochazka.Models.Team", b =>
@@ -330,7 +330,7 @@ namespace Dochazka.Migrations
                         .HasForeignKey("TeamId");
                 });
 
-            modelBuilder.Entity("Dochazka.Models.PresenceRecordV2", b =>
+            modelBuilder.Entity("Dochazka.Models.AttendanceRecord", b =>
                 {
                     b.HasOne("Dochazka.Areas.Identity.Data.ApplicationUser", "Employee")
                         .WithMany()

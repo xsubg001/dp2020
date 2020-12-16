@@ -1,0 +1,102 @@
+﻿@*@model IEnumerable<Dochazka.Models.AttendanceRecord>*@
+@model PaginatedList<Dochazka.Models.AttendanceRecord>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create a new attendance record</a>
+</p>
+
+@if (User.IsInRole("TeamAdministratorRole") || User.IsInRole("TeamManagerRole"))
+{
+    <form asp-controller="AttendanceRecords" asp-action="Index">
+        <p>
+            Search by name: <input type="text" name="searchString" value="@ViewData["CurrentFilter"]">
+            <input type="submit" value="Search" />
+            <a asp-action="Index">Back to Full List</a>
+        </p>
+    </form>
+}
+
+@if (Model.Count > 0)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    <a asp-action="Index" asp-route-sortOrder="@ViewData["DateSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">@Html.DisplayNameFor(model => model[0].WorkDay)</a>
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model[0].MorningAttendance)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model[0].AfternoonAttendance)
+                </th>
+                <th>                    
+                    <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">@Html.DisplayNameFor(model => model[0].Employee.FullName)</a>
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model[0].Employee.UserName)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model[0].ManagerApprovalStatus)
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.WorkDay)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.MorningAttendance)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.AfternoonAttendance)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Employee.FullName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Employee.UserName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.ManagerApprovalStatus)
+                    </td>
+                    <td>
+                        @Html.ActionLink("Edit", "Edit", new { item.EmployeeId, item.WorkDay }) |
+                        @Html.ActionLink("Details", "Details", new { item.EmployeeId, item.WorkDay }) |
+                        @Html.ActionLink("Delete", "Delete", new { item.EmployeeId, item.WorkDay })
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@{
+    var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+    var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+}
+
+<a asp-action="Index"
+    asp-route-sortOrder="@ViewData["CurrentSort"]"
+    asp-route-pageNumber="@(Model.PageIndex - 1)"
+    asp-route-currentFilter="@ViewData["CurrentFilter"]"
+    class="btn btn-default @prevDisabled">
+    Previous
+</a>
+<a asp-action="Index"
+    asp-route-sortOrder="@ViewData["CurrentSort"]"
+    asp-route-pageNumber="@(Model.PageIndex + 1)"
+    asp-route-currentFilter="@ViewData["CurrentFilter"]"
+    class="btn btn-default @nextDisabled">
+    Next
+</a>
