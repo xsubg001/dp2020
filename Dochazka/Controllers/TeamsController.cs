@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authorization;
 using Dochazka.Areas.Identity.Data;
 using Microsoft.AspNetCore.Identity;
+using Dochazka.HelperClasses;
 
 namespace Dochazka.Controllers
 {
@@ -30,10 +31,12 @@ namespace Dochazka.Controllers
         }
 
         // GET: Teams
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? pageNumber)
         {
-            var applicationDbContext = _context.Teams.Include(t => t.PrimaryManager);                                                     
-            return View(await applicationDbContext.ToListAsync());
+            var teams = _context.Teams.Include(t => t.PrimaryManager).AsNoTracking();                                                     
+            
+            //return View(await teams.ToListAsync());
+            return View(await PaginatedList<Team>.CreateAsync(teams, pageNumber ?? 1, CommonConstants.PAGE_SIZE));
         }
 
         // GET: Teams/Details/5
@@ -52,7 +55,7 @@ namespace Dochazka.Controllers
                 return NotFound();
             }
 
-            ViewBag.teamMembers = await _userManager.Users.Where(u => u.Team.TeamId == id).ToListAsync();
+            ViewBag.teamMembers = await _userManager.Users.Where(u => u.Team.TeamId == id).ToListAsync();            
             return View(team);
         }
 
