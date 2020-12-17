@@ -34,8 +34,10 @@ namespace Dochazka.Controllers
         public async Task<IActionResult> Index(string sortOrder, string currentFilter, string searchString, int? pageNumber)
         {
             ViewData["CurrentSort"] = sortOrder;
-            ViewData["NameSortParm"] = string.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
-            ViewData["DateSortParm"] = sortOrder == "date" ? "date_desc" : "date";
+            ViewData["DateSortParm"] = string.IsNullOrEmpty(sortOrder) ? "date" : "";
+            ViewData["NameSortParm"] = sortOrder == "name" ? "name_desc" : "name";
+            ViewData["ApprovalStatusSortParm"] = sortOrder == "approval" ? "approval_desc" : "approval";
+
 
             if (searchString != null)
             {
@@ -74,14 +76,20 @@ namespace Dochazka.Controllers
                 case "name_desc":
                     attendanceRecords = attendanceRecords.OrderByDescending(ar => ar.Employee.LastName + ar.Employee.FirstName);
                     break;
-                case "date":
+                case "name":                    
+                    attendanceRecords = attendanceRecords.OrderBy(ar => ar.Employee.LastName + ar.Employee.FirstName);
+                    break;
+                case "approval_desc":
+                    attendanceRecords = attendanceRecords.OrderByDescending(ar => ar.ManagerApprovalStatus);
+                    break;
+                case "approval":
+                    attendanceRecords = attendanceRecords.OrderBy(ar => ar.ManagerApprovalStatus);
+                    break;
+                case "date":                    
                     attendanceRecords = attendanceRecords.OrderBy(ar => ar.WorkDay);
                     break;
-                case "date_desc":
-                    attendanceRecords = attendanceRecords.OrderByDescending(ar => ar.WorkDay);
-                    break;
                 default:
-                    attendanceRecords = attendanceRecords.OrderBy(ar => ar.Employee.LastName + ar.Employee.FirstName);
+                    attendanceRecords = attendanceRecords.OrderByDescending(ar => ar.WorkDay);
                     break;
             }
             return View(await PaginatedList<AttendanceRecord>.CreateAsync(attendanceRecords, pageNumber ?? 1, CommonConstants.PAGE_SIZE));
@@ -153,12 +161,22 @@ namespace Dochazka.Controllers
                 return NotFound();
             }
 
-            var attendanceRecord = await _context.AttendanceRecords.Include(p => p.Employee).AsNoTracking().FirstOrDefaultAsync(p => p.EmployeeId == employeeId && p.WorkDay == workday);
+            var attendanceRecord = await _context.AttendanceRecords.Include(p => p.Employee).ThenInclude(e => e.Team)
+                                                                    .AsNoTracking().FirstOrDefaultAsync(p => p.EmployeeId == employeeId && p.WorkDay == workday);
             if (attendanceRecord == null)
             {
                 return NotFound();
             }
+
             PopulateViewDataWithSelectedItems(attendanceRecord);
+
+            var currentUserId = _userManager.GetUserId(User);
+            if ((attendanceRecord.Employee.Team.PrimaryManagerId == currentUserId) 
+                || (await _userManager.IsInRoleAsync(await _userManager.FindByIdAsync(currentUserId), Roles.TeamAdministratorRole.ToString())))
+            {
+                ViewData["ManagerApprovalStatusDisabled"] = false;
+            }
+            
             return View(attendanceRecord);
         }
 
@@ -184,7 +202,7 @@ namespace Dochazka.Controllers
             if (await TryUpdateModelAsync<AttendanceRecord>(
                 attendanceRecord,
                 "",
-                s => s.MorningAttendance, s => s.AfternoonAttendance))
+                s => s.MorningAttendance, s => s.AfternoonAttendance, s => s.ManagerApprovalStatus))
             {
                 if (ModelState.IsValid)
                 {
@@ -267,6 +285,8 @@ namespace Dochazka.Controllers
             ViewData["EmployeeId"] = new SelectList(_context.Users, "Id", "UserName", attendanceRecord.EmployeeId);
             ViewData["MorningAttendance"] = new SelectList(Enum.GetNames(typeof(Attendance)), attendanceRecord.MorningAttendance);
             ViewData["AfternoonAttendance"] = new SelectList(Enum.GetNames(typeof(Attendance)), attendanceRecord.AfternoonAttendance);
+            ViewData["ManagerApprovalStatus"] = new SelectList(Enum.GetNames(typeof(ManagerApprovalStatus)), attendanceRecord.ManagerApprovalStatus);
+            ViewData["ManagerApprovalStatusDisabled"] = true;
         }
     }
 }

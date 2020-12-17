@@ -30,13 +30,7 @@
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Employee.Id)
         </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.ManagerApprovalStatus)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.ManagerApprovalStatus)
-        </dd>
-    </dl>    
+    </dl>
 </div>
 <hr />
 <div class="col-md-4">
@@ -44,7 +38,7 @@
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <input type="hidden" asp-for="WorkDay" />
         <input type="hidden" asp-for="EmployeeId" />
-        <input type="hidden" asp-for="ManagerApprovalStatus" />
+        @*<input type="hidden" asp-for="ManagerApprovalStatus" />*@
         <div class="form-group">
             <label asp-for="MorningAttendance" class="control-label"></label>
             <select asp-for="MorningAttendance" class="form-control" asp-items="ViewBag.MorningAttendance"></select>
@@ -55,16 +49,45 @@
             <select asp-for="AfternoonAttendance" class="form-control" asp-items="ViewBag.AfternoonAttendance"></select>
             <span asp-validation-for="AfternoonAttendance" class="text-danger"></span>
         </div>
-        @*<div class="form-group">
+        <div class="form-group">
                 <label asp-for="ManagerApprovalStatus" class="control-label"></label>
-                <select asp-for="ManagerApprovalStatus" class="form-control"></select>
+                <select asp-for="ManagerApprovalStatus" class="form-control" asp-items="ViewBag.ManagerApprovalStatus" disabled="@ViewBag.ManagerApprovalStatusDisabled" ></select>
                 <span asp-validation-for="ManagerApprovalStatus" class="text-danger"></span>
-            </div>*@
+            </div>
         <div class="form-group">
             <input type="submit" value="Save" class="btn btn-primary" />
         </div>
     </form>
 </div>
+
+
+@*@if (Model.ManagerApprovalStatus != ManagerApprovalStatus.Approved)
+{
+    @if ((await AuthorizationService.AuthorizeAsync(
+User, Model, ContactOperations.Approve)).Succeeded)
+    {
+        <form style="display:inline;" method="post">
+            <input type="hidden" asp-for="WorkDay" />
+            <input type="hidden" asp-for="EmployeeId" />
+            <input type="hidden" name="status" value="@ManagerApprovalStatus.Approved" />
+            <button type="submit" class="btn btn-xs btn-success">Approve</button>
+        </form>
+    }
+}
+
+@if (Model.ManagerApprovalStatus != ManagerApprovalStatus.Rejected)
+{
+    @if ((await AuthorizationService.AuthorizeAsync(
+User, Model, ContactOperations.Reject)).Succeeded)
+    {
+        <form style="display:inline;" method="post">
+            <input type="hidden" asp-for="WorkDay" />
+            <input type="hidden" asp-for="EmployeeId" />
+            <input type="hidden" name="status" value="@ManagerApprovalStatus.Rejected" />
+            <button type="submit" class="btn btn-xs btn-danger">Reject</button>
+        </form>
+    }
+}*@
 
 <div>
     <a asp-action="Index">Back to List</a>
@@ -73,3 +96,5 @@
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }
+
+

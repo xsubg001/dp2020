@@ -16,7 +16,7 @@
 {
     <form asp-controller="AttendanceRecords" asp-action="Index">
         <p>
-            Search by name: <input type="text" name="searchString" value="@ViewData["CurrentFilter"]">
+            Search by Full Name: <input type="text" name="searchString" value="@ViewData["CurrentFilter"]">
             <input type="submit" value="Search" />
             <a asp-action="Index">Back to Full List</a>
         </p>
@@ -43,8 +43,8 @@
                 <th>
                     @Html.DisplayNameFor(model => model[0].Employee.UserName)
                 </th>
-                <th>
-                    @Html.DisplayNameFor(model => model[0].ManagerApprovalStatus)
+                <th>                    
+                    <a asp-action="Index" asp-route-sortOrder="@ViewData["ApprovalStatusSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">@Html.DisplayNameFor(model => model[0].ManagerApprovalStatus)</a>
                 </th>
             </tr>
         </thead>
