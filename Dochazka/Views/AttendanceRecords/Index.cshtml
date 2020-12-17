@@ -18,10 +18,19 @@
 {
     <form asp-controller="AttendanceRecords" asp-action="Index" method="get">
         <p>
-            Search by Full Name: <input type="text" name="searchString" value="@ViewData["CurrentFilter"]">
-            <input type="submit" value="Search" />
+            Filter by Full Name: <input type="text" name="searchString" value="@ViewData["CurrentFilter"]">
+            Filter by Month: <input type="month" data-val="true" id="selectedMonth" name="selectedMonth" value="@ViewData["SelectedMonth"]">
+            <input type="submit" value="Filter" />
             <a asp-action="Index">Back to Full List</a>
         </p>
+        <p>
+
+        </p>
+        <p>
+
+        </p>
+
+
     </form>
 }
 
@@ -55,66 +64,78 @@
             <tbody>
                 @foreach (var item in Model)
                 {
-                <tr>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.WorkDay)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.MorningAttendance)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.AfternoonAttendance)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Employee.FullName)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Employee.UserName)
-                    </td>
-                    <td>
-                        <div class="form-group">
-                            <input type="hidden" name="WorkDays" value="@item.WorkDay"/>
-                            <input type="hidden" name="EmployeeIds" value="@item.EmployeeId"/>
-                            <select name="ManagerApprovalStatuses"
-                                    class="form-control"
-                                    asp-items="Html.GetEnumSelectList<ManagerApprovalStatus>()"
-                                    disabled="@ViewBag.ManagerApprovalStatusDisabled">
-                                <option selected="selected" value="@item.ManagerApprovalStatus">@item.ManagerApprovalStatus</option>
-                            </select>
-                            <span asp-validation-for="@item.ManagerApprovalStatus" class="text-danger"></span>
-                        </div>
-                    </td>
-                    <td>
-                        @Html.ActionLink("Edit", "Edit", new { item.EmployeeId, item.WorkDay }) |
-                        @Html.ActionLink("Details", "Details", new { item.EmployeeId, item.WorkDay }) |
-                        @Html.ActionLink("Delete", "Delete", new { item.EmployeeId, item.WorkDay })
-                    </td>
-                </tr>
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.WorkDay)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.MorningAttendance)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.AfternoonAttendance)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Employee.FullName)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Employee.UserName)
+                        </td>
+                        <td>
+                            <div class="form-group">
+                                <input type="hidden" name="WorkDays" value="@item.WorkDay" />
+                                <input type="hidden" name="EmployeeIds" value="@item.EmployeeId" />
+                                <select name="ManagerApprovalStatuses"
+                                        class="form-control"
+                                        asp-items="Html.GetEnumSelectList<ManagerApprovalStatus>()"
+                                        disabled="@ViewBag.ManagerApprovalStatusDisabled">
+                                    <option selected="selected" value="@item.ManagerApprovalStatus">@item.ManagerApprovalStatus</option>
+                                </select>
+                                <span asp-validation-for="@item.ManagerApprovalStatus" class="text-danger"></span>
+                            </div>
+                        </td>
+                        <td>
+                            @Html.ActionLink("Edit", "Edit", new { item.EmployeeId, item.WorkDay }) |
+                            @Html.ActionLink("Details", "Details", new { item.EmployeeId, item.WorkDay }) |
+                            @Html.ActionLink("Delete", "Delete", new { item.EmployeeId, item.WorkDay })
+                        </td>
+                    </tr>
                 }
             </tbody>
         </table>
-        <input type="submit" value="Update" class="btn btn-primary"
-               style="width:auto" />
-        <a asp-action="Index" class="btn btn-primary" style="width:auto">Cancel</a>
     }
+
+    @{
+        var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+        var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+    }
+
+    <div class="row">
+        <div class="col-auto mr-auto">
+            <a asp-action="Index"
+               asp-route-sortOrder="@ViewData["CurrentSort"]"
+               asp-route-selectedMonth="@ViewData["SelectedMonth"]"
+               asp-route-pageNumber="@(Model.PageIndex - 1)"
+               asp-route-currentFilter="@ViewData["CurrentFilter"]"
+               class="btn btn-default @prevDisabled">
+                Previous
+            </a>
+
+            <a asp-action="Index"
+               asp-route-sortOrder="@ViewData["CurrentSort"]"
+               asp-route-selectedMonth="@ViewData["SelectedMonth"]"
+               asp-route-pageNumber="@(Model.PageIndex + 1)"
+               asp-route-currentFilter="@ViewData["CurrentFilter"]"
+               class="btn btn-default @nextDisabled">
+                Next
+            </a>
+        </div>
+        <div class="col-auto">
+            <input type="hidden" name="selectedMonth" value="@ViewData["EmployeeId"]" />
+            <input type="submit" value="Update Approvals" class="btn btn-primary"
+                   style="width:auto" />
+            <a asp-action="Index" class="btn btn-primary" style="width:auto">Cancel</a>
+        </div>
+    </div>
 </form>
 
-@{
-    var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
-    var nextDisabled = !Model.HasNextPage ? "disabled" : "";
-}
 
-<a asp-action="Index"
-   asp-route-sortOrder="@ViewData["CurrentSort"]"
-   asp-route-pageNumber="@(Model.PageIndex - 1)"
-   asp-route-currentFilter="@ViewData["CurrentFilter"]"
-   class="btn btn-default @prevDisabled">
-    Previous
-</a>
-<a asp-action="Index"
-   asp-route-sortOrder="@ViewData["CurrentSort"]"
-   asp-route-pageNumber="@(Model.PageIndex + 1)"
-   asp-route-currentFilter="@ViewData["CurrentFilter"]"
-   class="btn btn-default @nextDisabled">
-    Next
-</a>

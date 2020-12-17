@@ -33,7 +33,7 @@ namespace Dochazka.Controllers
         }
 
         // GET: AttendanceRecords
-        public async Task<IActionResult> Index(string sortOrder, string currentFilter, string searchString, int? pageNumber, string infoMessage)
+        public async Task<IActionResult> Index(string sortOrder, string currentFilter, string searchString, int? pageNumber, string infoMessage, DateTime selectedMonth)
         {
             ViewData["CurrentSort"] = sortOrder;
             ViewData["DateSortParm"] = string.IsNullOrEmpty(sortOrder) ? "date" : "";
@@ -51,10 +51,21 @@ namespace Dochazka.Controllers
                 searchString = currentFilter;
             }
 
+            _logger.LogInformation($"Request month value: {selectedMonth}");
+            if ((selectedMonth == null) || (selectedMonth == DateTime.MinValue))
+            {                
+                selectedMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+            }
+            ViewData["SelectedMonth"] = $"{selectedMonth.Year}-{selectedMonth.Month}";
+            var daysInMonth = DateTime.DaysInMonth(selectedMonth.Year, selectedMonth.Month);
+
             ViewData["CurrentFilter"] = searchString;
 
             var currentUserId = _userManager.GetUserId(User);
-            var attendanceRecords = _context.AttendanceRecords.Include(p => p.Employee).ThenInclude(e => e.Team).AsNoTracking();
+            var attendanceRecords = _context.AttendanceRecords.Where(ar => ar.WorkDay >= selectedMonth && ar.WorkDay < selectedMonth.AddDays(daysInMonth))
+                                                                .Include(p => p.Employee)
+                                                                .ThenInclude(e => e.Team)
+                                                                .AsNoTracking();
 
             if (await _userManager.IsInRoleAsync(await _userManager.FindByIdAsync(currentUserId), Roles.TeamAdministratorRole.ToString()))
             {                
@@ -109,7 +120,7 @@ namespace Dochazka.Controllers
         {
             string infoMessage = "";
             int successUpdates = 0;
-            for (int i = 0; i < bulkApprovals.EmployeeIds.Count(); i++)
+            for (int i = 0; i < bulkApprovals.EmployeeIds?.Count(); i++)
             {
                 var employeeId = bulkApprovals.EmployeeIds[i];
                 var workday = bulkApprovals.WorkDays[i];
