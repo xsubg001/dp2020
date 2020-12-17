@@ -25,6 +25,7 @@ namespace Dochazka.Models
 
         // user ID from AspNetUser table.
         public string EmployeeId { get; set; }
+
         [Display(Name = "Manager Approval Status")]
         public ManagerApprovalStatus ManagerApprovalStatus { get; set; }
 

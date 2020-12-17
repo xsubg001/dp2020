@@ -13,6 +13,8 @@ using System.Security.Claims;
 using Dochazka.Areas.Identity.Data;
 using System.Collections.Generic;
 using Dochazka.HelperClasses;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Razor;
 
 namespace Dochazka.Controllers
 {
@@ -31,12 +33,13 @@ namespace Dochazka.Controllers
         }
 
         // GET: AttendanceRecords
-        public async Task<IActionResult> Index(string sortOrder, string currentFilter, string searchString, int? pageNumber)
+        public async Task<IActionResult> Index(string sortOrder, string currentFilter, string searchString, int? pageNumber, string infoMessage)
         {
             ViewData["CurrentSort"] = sortOrder;
             ViewData["DateSortParm"] = string.IsNullOrEmpty(sortOrder) ? "date" : "";
             ViewData["NameSortParm"] = sortOrder == "name" ? "name_desc" : "name";
             ViewData["ApprovalStatusSortParm"] = sortOrder == "approval" ? "approval_desc" : "approval";
+            ViewData["InfoMessage"] = infoMessage;
 
 
             if (searchString != null)
@@ -92,11 +95,74 @@ namespace Dochazka.Controllers
                     attendanceRecords = attendanceRecords.OrderByDescending(ar => ar.WorkDay);
                     break;
             }
+            ViewData["ManagerApprovalStatusDisabled"] = false;
             return View(await PaginatedList<AttendanceRecord>.CreateAsync(attendanceRecords, pageNumber ?? 1, CommonConstants.PAGE_SIZE));
         }
 
-        // GET: AttendanceRecords/Details/5
-        public async Task<IActionResult> Details(string employeeId, DateTime workday)
+        // POST: AttendanceRecords/Create
+        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
+        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Index(string[] workDay, string[] employeeId, string[] managerApprovalStatus)
+        public async Task<IActionResult> Index(BulkApprovalViewModel bulkApprovals)
+        {
+            string infoMessage = "";
+            int successUpdates = 0;
+            for (int i = 0; i < bulkApprovals.EmployeeIds.Count(); i++)
+            {
+                var employeeId = bulkApprovals.EmployeeIds[i];
+                var workday = bulkApprovals.WorkDays[i];
+                var newManagerApprovalStatus = bulkApprovals.ManagerApprovalStatuses[i];
+
+                if ((employeeId == null) || (workday == null))
+                {
+                    return NotFound();
+                }
+                var attendanceRecord = await _context.AttendanceRecords.FindAsync(employeeId, workday);
+                if (attendanceRecord == null)
+                {
+                    return NotFound();
+                }
+
+                if (attendanceRecord.ManagerApprovalStatus != newManagerApprovalStatus)
+                {
+                    attendanceRecord.ManagerApprovalStatus = newManagerApprovalStatus;
+                    if (ModelState.IsValid)
+                    {
+                        try
+                        {
+                            _context.Update(attendanceRecord);
+                            await _context.SaveChangesAsync();
+                            ++successUpdates;                            
+                        }
+                        catch (DbUpdateConcurrencyException)
+                        {
+                            if (!AttendanceRecordExists(attendanceRecord.EmployeeId, attendanceRecord.WorkDay))
+                            {
+                                return NotFound();
+                            }
+                            else
+                            {
+                                throw;
+                            }
+                        }
+                    }
+                }
+            }
+            if (successUpdates == 1)
+            {
+                infoMessage = $"Approval statuses updated successfully for {successUpdates} record";
+            }
+            else if (successUpdates > 1)
+            {
+                infoMessage = $"Approval statuses updated successfully for {successUpdates} records";
+            }
+            return RedirectToAction(nameof(Index), new { infoMessage = infoMessage});
+        }
+
+            // GET: AttendanceRecords/Details/5
+            public async Task<IActionResult> Details(string employeeId, DateTime workday)
         {
             if ((employeeId == null) || (workday == null))
             {
