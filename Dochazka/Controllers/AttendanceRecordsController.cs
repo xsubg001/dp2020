@@ -109,7 +109,7 @@ namespace Dochazka.Controllers
 
             if (getAsCsv)
             {
-                DataTable exportTable = await GetAttendanceRecordsDataTable(attendanceRecords);
+                DataTable exportTable = await GetAttendanceRecordsAsDataTable(attendanceRecords);
                 var csvResult = new CSVResult(exportTable, $"{ currentUserId }_{ DateTime.Now.ToString() }.csv");
                 return csvResult;
             }
@@ -119,7 +119,7 @@ namespace Dochazka.Controllers
             }
         }
 
-        private static async Task<DataTable> GetAttendanceRecordsDataTable(IQueryable<AttendanceRecord> attendanceRecords)
+        private async Task<DataTable> GetAttendanceRecordsAsDataTable(IQueryable<AttendanceRecord> attendanceRecords)
         {
             var attendanceRecordsAsList = await attendanceRecords.ToListAsync();
             DataTable table = new DataTable("ExportAsCsv");
@@ -145,6 +145,38 @@ namespace Dochazka.Controllers
                         ar.Employee.UserName,
                         ar.ManagerApprovalStatus
                     });
+            }
+
+            return table;
+        }
+
+
+        private async Task<DataTable> GetSummaryResultsAsDataTable(Dictionary<string, Dictionary<string, int>> byEmployeeIDResults, DateTime selectedMonth)
+        {
+            DataTable table = new DataTable("ExportAsCsv");
+            DataColumn[] columns =
+                {
+                    new DataColumn("employeeid", typeof(String)),
+                    new DataColumn("username", typeof(String)),
+                    new DataColumn("month", typeof(DateTime))
+                };
+            table.Columns.AddRange(columns);
+            foreach (string attendanceValue in Enum.GetNames(typeof(Attendance)))
+            {
+                table.Columns.Add(new DataColumn(attendanceValue.ToLower(), typeof(int)));
+            }           
+
+            foreach (var employeeID in byEmployeeIDResults.Keys)
+            {
+                DataRow row = table.NewRow();
+                row["employeeid"] = employeeID;
+                row["username"] = await _userManager.FindByIdAsync(employeeID);                
+                row["month"] = selectedMonth;
+                foreach (string attendanceValue in byEmployeeIDResults[employeeID].Keys)
+                {
+                    row[attendanceValue] = byEmployeeIDResults[employeeID][attendanceValue];
+                }
+                table.Rows.Add(row);
             }
 
             return table;
@@ -211,6 +243,94 @@ namespace Dochazka.Controllers
                 infoMessage = $"Approval statuses updated successfully for {successUpdates} records";
             }
             return RedirectToAction(nameof(Index), new { infoMessage = infoMessage });
+        }
+
+
+        // GET: Payroll summary for selected employees
+        public async Task<IActionResult> PayrollSummary(string sortOrder, string currentFilter, string searchString, int? pageNumber, string infoMessage, DateTime selectedMonth, bool getAsCsv)
+        {
+            ViewData["CurrentSort"] = sortOrder;
+            ViewData["DateSortParm"] = string.IsNullOrEmpty(sortOrder) ? "date" : "";
+            ViewData["NameSortParm"] = sortOrder == "name" ? "name_desc" : "name";
+            ViewData["ApprovalStatusSortParm"] = sortOrder == "approval" ? "approval_desc" : "approval";
+            ViewData["ManagerApprovalControlDisabled"] = true;
+            ViewData["InfoMessage"] = infoMessage;
+
+            _logger.LogInformation($"Request month value: {selectedMonth}");
+            if ((selectedMonth == null) || (selectedMonth == DateTime.MinValue))
+            {
+                selectedMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+            }
+            ViewData["SelectedMonth"] = $"{selectedMonth.Year}-{selectedMonth.Month}";
+            var daysInMonth = DateTime.DaysInMonth(selectedMonth.Year, selectedMonth.Month);
+
+            ViewData["CurrentFilter"] = searchString;
+
+            var currentUserId = _userManager.GetUserId(User);
+            var attendanceRecords = _context.AttendanceRecords.Where(ar => ar.WorkDay >= selectedMonth && ar.WorkDay < selectedMonth.AddDays(daysInMonth))
+                                                              .Where(ar => ar.ManagerApprovalStatus == ManagerApprovalStatus.Approved)
+                                                                .Include(p => p.Employee)
+                                                                .ThenInclude(e => e.Team)
+                                                                .AsNoTracking();
+
+            if (await _userManager.IsInRoleAsync(await _userManager.FindByIdAsync(currentUserId), Roles.TeamAdministratorRole.ToString()))
+            {
+            }
+            else if (await _userManager.IsInRoleAsync(await _userManager.FindByIdAsync(currentUserId), Roles.TeamManagerRole.ToString()))
+            {
+                attendanceRecords = attendanceRecords.Where(ar => ar.EmployeeId == currentUserId || ar.Employee.Team.PrimaryManagerId == currentUserId);
+            }
+            else
+            {
+                attendanceRecords = attendanceRecords.Where(ar => ar.EmployeeId == currentUserId);
+            }
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                attendanceRecords = attendanceRecords.Where(ar => (ar.Employee.LastName + ar.Employee.FirstName).Contains(searchString));
+            }
+
+            var byEmployeeIDResults = new Dictionary<string, Dictionary<string, int>>();
+            var arByUsername = attendanceRecords.ToList().GroupBy(ar => ar.EmployeeId);
+
+            foreach (var group in arByUsername)
+            {
+                var afternoonSummary = group.GroupBy(ar => ar.AfternoonAttendance.ToString(), ar => ar.AfternoonAttendance, (afternoon, allAfternoons) => new { key = afternoon, countAR = allAfternoons.Count() });
+                var morningSummary = group.GroupBy(ar => ar.MorningAttendance.ToString(), ar => ar.MorningAttendance, (morning, allMornings) => new { key = morning, countAR = allMornings.Count() });
+                byEmployeeIDResults[group.Key] = new Dictionary<string, int>();
+                foreach (var attendance in Enum.GetNames(typeof(Attendance)))
+                {
+                    byEmployeeIDResults[group.Key].Add(attendance, 0);
+                    byEmployeeIDResults[group.Key][attendance] += afternoonSummary.Any(x => x.key == attendance) ? afternoonSummary.First(x => x.key == attendance).countAR : 0 ;
+                    byEmployeeIDResults[group.Key][attendance] += morningSummary.Any(x => x.key == attendance) ? morningSummary.First(x => x.key == attendance).countAR : 0;
+                }
+            }
+
+            DataTable exportTable = await GetSummaryResultsAsDataTable(byEmployeeIDResults, selectedMonth);
+
+            if (getAsCsv)
+            {                
+                var csvResult = new CSVResult(exportTable, $"{ currentUserId }_{ DateTime.Now.ToString() }.csv");
+                return csvResult;
+            }
+            else
+            {
+                List<PayrollSummaryModel> payrollSummaryList = exportTable.AsEnumerable().Select(m => new PayrollSummaryModel()
+                {
+                    EmployeeID = m.Field<string>("EmployeeID".ToLower()),
+                    UserName = m.Field<string>("UserName".ToLower()),
+                    Month = m.Field<DateTime>("Month".ToLower()),
+                    Absence = m.Field<int>("Absence".ToLower()),
+                    DoctorSickness = m.Field<int>("DoctorSickness".ToLower()),
+                    PaidVacation = m.Field<int>("PaidVacation".ToLower()),
+                    LegalJustification = m.Field<int>("LegalJustification".ToLower()),
+                    Sickleave = m.Field<int>("Sickleave".ToLower()),
+                    UnpaidVacation = m.Field<int>("Sickleave".ToLower()),
+                    WorkingTime = m.Field<int>("WorkingTime".ToLower())
+                }).ToList();
+                //return View(await PaginatedList<PayrollSummaryModel>.Create(payrollSummaryList.AsQueryable<PayrollSummaryModel>(), pageNumber ?? 1, CommonConstants.PAGE_SIZE));
+                return View(payrollSummaryList);
+            }
         }
 
         // GET: AttendanceRecords/Details/5

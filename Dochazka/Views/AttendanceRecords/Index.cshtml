@@ -38,6 +38,15 @@
        asp-route-currentFilter="@ViewData["CurrentFilter"]">
         Export results as CSV file
     </a>
+    <br />
+    <a asp-action="PayrollSummary"
+       asp-route-getAsCsv=false
+       asp-route-sortOrder="@ViewData["CurrentSort"]"
+       asp-route-selectedMonth="@ViewData["SelectedMonth"]"
+       asp-route-pageNumber="@(Model.PageIndex + 1)"
+       asp-route-currentFilter="@ViewData["CurrentFilter"]">
+        Payroll summary
+    </a>
 </p>
 
 <form asp-action="Index">

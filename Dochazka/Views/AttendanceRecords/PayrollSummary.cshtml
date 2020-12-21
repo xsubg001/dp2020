@@ -1,0 +1,119 @@
+﻿@model List<PayrollSummaryModel>
+
+@{
+    ViewData["Title"] = "Payroll Summary";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Payroll Summary</h1>
+
+<form asp-controller="AttendanceRecords" asp-action="PayrollSummary" method="get">
+    <div class="row">
+        @if (User.IsInRole("TeamAdministratorRole") || User.IsInRole("TeamManagerRole"))
+        {
+            <div class="col-auto">
+                Filter by Full Name: <input type="text" name="searchString" value="@ViewData["CurrentFilter"]">
+            </div>
+        }
+        <div class="col-auto">
+            Filter by Month: <input type="month" data-val="true" id="selectedMonth" name="selectedMonth" value="@ViewData["SelectedMonth"]">
+            <input type="submit" value="Filter" />
+            <a asp-action="PayrollSummary">Reset Filter</a>
+        </div>
+    </div>
+</form>
+
+<br />
+<p>
+    <a asp-action="PayrollSummary"
+       asp-route-getAsCsv=true
+       asp-route-sortOrder="@ViewData["CurrentSort"]"
+       asp-route-selectedMonth="@ViewData["SelectedMonth"]"       
+       asp-route-currentFilter="@ViewData["CurrentFilter"]">
+        Export Payroll Summary as CSV
+    </a>
+</p>
+
+
+@if (Model.Count > 0)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model[0].EmployeeID)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model[0].UserName)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model[0].Month)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model[0].WorkingTime)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model[0].PaidVacation)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model[0].UnpaidVacation)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model[0].Sickleave)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model[0].DoctorSickness)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model[0].LegalJustification)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model[0].Absence)
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.EmployeeID)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.UserName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Month)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.WorkingTime)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.PaidVacation)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.UnpaidVacation)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Sickleave)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.DoctorSickness)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.LegalJustification)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Absence)
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+
