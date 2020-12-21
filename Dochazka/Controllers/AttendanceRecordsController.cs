@@ -43,7 +43,6 @@ namespace Dochazka.Controllers
             ViewData["ManagerApprovalControlDisabled"] = true;
             ViewData["InfoMessage"] = infoMessage;
 
-
             if (searchString != null)
             {
                 pageNumber = 1;
@@ -75,7 +74,6 @@ namespace Dochazka.Controllers
             else if (await _userManager.IsInRoleAsync(await _userManager.FindByIdAsync(currentUserId), Roles.TeamManagerRole.ToString()))
             {
                 attendanceRecords = attendanceRecords.Where(ar => ar.EmployeeId == currentUserId || ar.Employee.Team.PrimaryManagerId == currentUserId);
-                ViewData["ManagerApprovalControlDisabled"] = false;
             }
             else
             {
@@ -119,7 +117,6 @@ namespace Dochazka.Controllers
             {
                 return View(await PaginatedList<AttendanceRecord>.CreateAsync(attendanceRecords, pageNumber ?? 1, CommonConstants.PAGE_SIZE));
             }
-
         }
 
         private static async Task<DataTable> GetAttendanceRecordsDataTable(IQueryable<AttendanceRecord> attendanceRecords)

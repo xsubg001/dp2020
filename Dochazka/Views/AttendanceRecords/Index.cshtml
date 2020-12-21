@@ -89,13 +89,30 @@
                             <div class="form-group">
                                 <input type="hidden" name="WorkDays" value="@item.WorkDay" />
                                 <input type="hidden" name="EmployeeIds" value="@item.EmployeeId" />
-                                <select name="ManagerApprovalStatuses"
-                                        class="form-control"
-                                        asp-items="Html.GetEnumSelectList<ManagerApprovalStatus>()"
-                                        disabled="@ViewBag.ManagerApprovalControlDisabled">
-                                    <option selected="selected" value="@item.ManagerApprovalStatus">@item.ManagerApprovalStatus</option>
-                                </select>
-                                <span asp-validation-for="@item.ManagerApprovalStatus" class="text-danger"></span>
+                                @{
+                                    var user = await userManager.GetUserAsync(User);
+                                    var currentUserId = user?.Id;                                    
+                                    if (await userManager.IsInRoleAsync(await userManager.FindByIdAsync(currentUserId), Roles.TeamAdministratorRole.ToString()) ||
+                                    (await userManager.IsInRoleAsync(await userManager.FindByIdAsync(currentUserId), Roles.TeamManagerRole.ToString()) && item.Employee.Team.PrimaryManagerId == currentUserId))
+                                    {
+                                        <select name="ManagerApprovalStatuses"
+                                                class="form-control"
+                                                asp-items="Html.GetEnumSelectList<ManagerApprovalStatus>()">
+                                            <option selected="selected" value="@item.ManagerApprovalStatus">@item.ManagerApprovalStatus</option>
+                                        </select>
+
+                                    }
+                                    else
+                                    {
+                                        <input type="hidden" name="ManagerApprovalStatuses" value="@item.ManagerApprovalStatus" />
+                                        <select name="ManagerApprovalStatuses"
+                                                class="form-control"
+                                                asp-items="Html.GetEnumSelectList<ManagerApprovalStatus>()"
+                                                disabled="disabled">
+                                            <option selected="selected" value="@item.ManagerApprovalStatus">@item.ManagerApprovalStatus</option>
+                                        </select>
+                                    }
+                                }                                
                             </div>
                         </td>
                         <td>

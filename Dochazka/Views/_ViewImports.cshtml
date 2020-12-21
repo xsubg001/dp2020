@@ -1,8 +1,11 @@
 ﻿@using Dochazka
 @using Dochazka.Models
+@using Dochazka.Data
 @using Dochazka.HelperClasses
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @using Dochazka.Authorization;
 @using Microsoft.AspNetCore.Authorization
 @using System.Globalization;
 @inject IAuthorizationService AuthorizationService
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<Dochazka.Areas.Identity.Data.ApplicationUser> userManager 
