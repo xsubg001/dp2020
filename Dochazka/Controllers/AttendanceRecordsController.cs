@@ -247,15 +247,8 @@ namespace Dochazka.Controllers
 
 
         // GET: Payroll summary for selected employees
-        public async Task<IActionResult> PayrollSummary(string sortOrder, string currentFilter, string searchString, int? pageNumber, string infoMessage, DateTime selectedMonth, bool getAsCsv)
-        {
-            ViewData["CurrentSort"] = sortOrder;
-            ViewData["DateSortParm"] = string.IsNullOrEmpty(sortOrder) ? "date" : "";
-            ViewData["NameSortParm"] = sortOrder == "name" ? "name_desc" : "name";
-            ViewData["ApprovalStatusSortParm"] = sortOrder == "approval" ? "approval_desc" : "approval";
-            ViewData["ManagerApprovalControlDisabled"] = true;
-            ViewData["InfoMessage"] = infoMessage;
-
+        public async Task<IActionResult> PayrollSummary(string searchString, DateTime selectedMonth, bool getAsCsv)
+        {                        
             _logger.LogInformation($"Request month value: {selectedMonth}");
             if ((selectedMonth == null) || (selectedMonth == DateTime.MinValue))
             {
@@ -315,22 +308,27 @@ namespace Dochazka.Controllers
             }
             else
             {
-                List<PayrollSummaryModel> payrollSummaryList = exportTable.AsEnumerable().Select(m => new PayrollSummaryModel()
-                {
-                    EmployeeID = m.Field<string>("EmployeeID".ToLower()),
-                    UserName = m.Field<string>("UserName".ToLower()),
-                    Month = m.Field<DateTime>("Month".ToLower()),
-                    Absence = m.Field<int>("Absence".ToLower()),
-                    DoctorSickness = m.Field<int>("DoctorSickness".ToLower()),
-                    PaidVacation = m.Field<int>("PaidVacation".ToLower()),
-                    LegalJustification = m.Field<int>("LegalJustification".ToLower()),
-                    Sickleave = m.Field<int>("Sickleave".ToLower()),
-                    UnpaidVacation = m.Field<int>("Sickleave".ToLower()),
-                    WorkingTime = m.Field<int>("WorkingTime".ToLower())
-                }).ToList();
+                List<PayrollSummaryModel> payrollSummaryList = ConvertDataTableToPayrollSummaryList(exportTable);
                 //return View(await PaginatedList<PayrollSummaryModel>.Create(payrollSummaryList.AsQueryable<PayrollSummaryModel>(), pageNumber ?? 1, CommonConstants.PAGE_SIZE));
                 return View(payrollSummaryList);
             }
+        }
+
+        private List<PayrollSummaryModel> ConvertDataTableToPayrollSummaryList(DataTable exportTable)
+        {
+            return exportTable.AsEnumerable().Select(m => new PayrollSummaryModel()
+            {
+                EmployeeID = m.Field<string>("EmployeeID".ToLower()),
+                UserName = m.Field<string>("UserName".ToLower()),
+                Month = m.Field<DateTime>("Month".ToLower()),
+                Absence = m.Field<int>("Absence".ToLower()),
+                DoctorSickness = m.Field<int>("DoctorSickness".ToLower()),
+                PaidVacation = m.Field<int>("PaidVacation".ToLower()),
+                LegalJustification = m.Field<int>("LegalJustification".ToLower()),
+                Sickleave = m.Field<int>("Sickleave".ToLower()),
+                UnpaidVacation = m.Field<int>("Sickleave".ToLower()),
+                WorkingTime = m.Field<int>("WorkingTime".ToLower())
+            }).ToList();
         }
 
         // GET: AttendanceRecords/Details/5
