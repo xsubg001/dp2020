@@ -117,7 +117,7 @@ namespace Dochazka.Controllers
 
             if (getAsCsv)
             {
-                DataTable exportTable = await GetAttendanceRecordsAsDataTable(attendanceRecords);
+                DataTable exportTable = GetAttendanceRecordsAsDataTable(attendanceRecords);
                 var csvResult = new CSVResult(exportTable,
                     $"{currentUserId}_{DateTime.Now.ToString(CultureInfo.InvariantCulture)}.csv");
                 return csvResult;
@@ -129,9 +129,9 @@ namespace Dochazka.Controllers
             }
         }
 
-        private async Task<DataTable> GetAttendanceRecordsAsDataTable(IQueryable<AttendanceRecord> attendanceRecords)
+        public static DataTable GetAttendanceRecordsAsDataTable(IQueryable<AttendanceRecord> attendanceRecords)
         {
-            var attendanceRecordsAsList = await attendanceRecords.ToListAsync();
+            var attendanceRecordsAsList = attendanceRecords.ToList();
             DataTable table = new DataTable("ExportAsCsv");
             DataColumn[] columns =
             {
@@ -147,7 +147,7 @@ namespace Dochazka.Controllers
 
             foreach (var ar in attendanceRecordsAsList)
             {
-                table.Rows.Add(new Object[]
+                table.Rows.Add(new object[]
                 {
                     ar.WorkDay.Date.ToShortDateString(),
                     ar.MorningAttendance,

@@ -1,0 +1,3 @@
+"WorkDay","MorningAttendance","AfternoonAttendance","FullName","UserName","Manager Approval Status"
+"01/01/2020","Absence","DoctorSickness","Vomacka Karel","karel.vomacka@email.com","Rejected"
+"01/02/2020","LegalJustification","Sickleave","Vomacka Tomas","tomas.vomacka@email.com","Approved"

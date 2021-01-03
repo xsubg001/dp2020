@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityTutorial", "..\Iden
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dochazka", "..\Dochazka\Dochazka.csproj", "{032AEB79-9D11-4C38-B353-6082E659C587}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dochazka.Tests", "..\Dochazka.Tests\Dochazka.Tests.csproj", "{2CE36921-24FC-4226-A183-525AD60E4973}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{032AEB79-9D11-4C38-B353-6082E659C587}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{032AEB79-9D11-4C38-B353-6082E659C587}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{032AEB79-9D11-4C38-B353-6082E659C587}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2CE36921-24FC-4226-A183-525AD60E4973}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2CE36921-24FC-4226-A183-525AD60E4973}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2CE36921-24FC-4226-A183-525AD60E4973}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2CE36921-24FC-4226-A183-525AD60E4973}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
