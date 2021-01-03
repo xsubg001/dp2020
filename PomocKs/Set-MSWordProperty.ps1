@@ -1,9 +1,15 @@
 <#
-By default: C:\Temp folder is scanned for *.doc and *.docx and those are opened and saved.
-If antidate 
-Run as: 
-    .\Set-MSWordProperty.ps1 -antidate -newOldDate 2018-06-18 
-    .\Set-MSWordProperty.ps1 -antidate -newOldDate 2018-06-18 -path C:\MyDocuments
+By default, C:\Temp folder is scanned for *.doc and *.docx and those are opened and saved with actual system date.
+If option "-antidateEnabled" is on, it must be run in admin console, because Set-Date requires Admin permissions.
+
+Run as following: 
+    1. cd <folder-containing-this-script>
+    2b. In normal Powershell console/ISE window:
+    .\Set-NewMSWordDate.ps1 -path C:\MyDocuments
+
+    2a. Run in admin/elevated  Powershell console/ISE window:
+    .\Set-NewMSWordDate.ps1 -antidateEnabled -newOldDate 2018-06-18 
+    .\Set-NewMSWordDate.ps1 -antidateEnabled -newOldDate 2018-06-18 -path C:\MyDocuments
 #>
 
 Param(
