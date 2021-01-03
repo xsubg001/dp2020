@@ -1,6 +1,7 @@
 <#
 By default, C:\Temp folder is scanned for *.doc and *.docx and those are opened and saved with actual system date.
-If option "-antidateEnabled" is on, it must be run in admin console, because Set-Date requires Admin permissions.
+If option "-antidateEnabled" is on, it must be run in admin console, because Set-Date requires Admin permissions. It may also require:
+"Set-ExecutionPolicy -ExecutionPolicy Unrestricted" to be able to run this script
 
 Run as following: 
     1. cd <folder-containing-this-script>
