@@ -4,12 +4,12 @@ If option "-antidateEnabled" is on, it must be run in admin console, because Set
 
 Run as following: 
     1. cd <folder-containing-this-script>
-    2b. In normal Powershell console/ISE window:
-    .\Set-NewMSWordDate.ps1 -path C:\MyDocuments
+    2a. Either in normal Powershell console/ISE window:
+    .\Set-MSWordProperty.ps1 -path C:\MyDocuments
 
-    2a. Run in admin/elevated  Powershell console/ISE window:
-    .\Set-NewMSWordDate.ps1 -antidateEnabled -newOldDate 2018-06-18 
-    .\Set-NewMSWordDate.ps1 -antidateEnabled -newOldDate 2018-06-18 -path C:\MyDocuments
+    2b. Or in admin/elevated Powershell console/ISE window with "antidateEnabled" parameter set:
+    .\Set-MSWordProperty.ps1 -antidateEnabled -newOldDate 2018-06-18 
+    .\Set-MSWordProperty.ps1 -antidateEnabled -newOldDate 2018-06-18 -path C:\MyDocuments
 #>
 
 Param(
