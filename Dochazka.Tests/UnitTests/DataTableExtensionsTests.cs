@@ -7,7 +7,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Dochazka.Controllers;
 using System.Linq;
 
-namespace Dochazka.Tests
+namespace Dochazka.Tests.UnitTests
 {
     [TestClass]
     public class DataTableExtensionsTests
@@ -34,7 +34,7 @@ namespace Dochazka.Tests
         }
 
         [TestMethod]
-        public void WriteToCsvStringTest()
+        public void WriteToCsvString()
         {
             // 1. Arrange              
             string expectedResult = System.IO.File.ReadAllText(@"TestResources\WriteToCsvStringTest.csv");
