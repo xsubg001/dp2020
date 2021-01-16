@@ -3,19 +3,17 @@ using System.Collections.Generic;
 using System.Data;
 using Dochazka.HelperClasses;
 using Dochazka.Models;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Dochazka.Controllers;
 using System.Linq;
 
 namespace Dochazka.Tests.UnitTests
-{
-    [TestClass]
+{    
     public class DataTableExtensionsTests
     {
-        List<AttendanceRecord> attendanceRecordsAsList;
+        private readonly List<AttendanceRecord> attendanceRecordsAsList;
 
-        [TestInitialize]
-        public void SetupTest()
+        public DataTableExtensionsTests()
         {            
             attendanceRecordsAsList = new List<AttendanceRecord>() {
                         new AttendanceRecord { WorkDay = new DateTime(2020,01,01),
@@ -33,7 +31,7 @@ namespace Dochazka.Tests.UnitTests
             };
         }
 
-        [TestMethod]
+        [Fact]
         public void WriteToCsvString()
         {
             // 1. Arrange              
@@ -44,7 +42,7 @@ namespace Dochazka.Tests.UnitTests
             string actualResult = dt.WriteToCsvString();
 
             // 3. Assert
-            Assert.AreEqual(expectedResult,actualResult);
+            Assert.Equal(expectedResult,actualResult);
         }
     }
 }

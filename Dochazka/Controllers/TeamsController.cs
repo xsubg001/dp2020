@@ -44,7 +44,7 @@ namespace Dochazka.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return NotFound();                
             }
 
             var team = await _context.Teams

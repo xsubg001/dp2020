@@ -28,7 +28,8 @@ namespace Dochazka.Controllers
             ApplicationDbContext context,
             IAuthorizationService authorizationService) : base(context, authorizationService, userManager)
         {
-            _roleManager = roleManager;            
+            _roleManager = roleManager;
+            _logger = logger;
         }
         public async Task<IActionResult> Index(string sortOrder, string currentFilter, string searchString, int? pageNumber)
         {
