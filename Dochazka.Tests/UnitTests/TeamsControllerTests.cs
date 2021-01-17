@@ -26,9 +26,7 @@ namespace Dochazka.Tests.UnitTests
         public List<int> testList;
         private UserManager<ApplicationUser> userManager;
         private Mock<ILogger<TeamsController>> mockLogger;
-
         private DbContextOptions<ApplicationDbContext> TestContextOptions { get; set; }
-
         private readonly ApplicationDbContext _dbContext;
         private readonly Mock<IAuthorizationService> mockAuthorizationService;
         private readonly Mock<IUserStore<ApplicationUser>> mockUserStore;
@@ -40,21 +38,9 @@ namespace Dochazka.Tests.UnitTests
             mockAuthorizationService = new Mock<IAuthorizationService>();
             mockUserStore = new Mock<IUserStore<ApplicationUser>>();
             var mockUserStoreQuearyable = mockUserStore.As<IQueryableUserStore<ApplicationUser>>();
-            //var mockQueryableApplicationUsers = new Mock<IQueryable<ApplicationUser>>();
-            //mockUserStoreQuearyable.SetupProperty(x => x.Users, mockQueryableApplicationUsers.Object);
             mockUserStoreQuearyable.Setup(x => x.Users).Returns(GetUsers().AsQueryable());
-
-
-            mockUserStore.Setup(x => x.FindByIdAsync("001", CancellationToken.None))
-                .ReturnsAsync(new ApplicationUser()
-                {
-                    UserName = "testser001@testmail.com",
-                    Id = "001"
-                });
-
             userManager = new UserManager<ApplicationUser>(mockUserStoreQuearyable.Object, null, null, null, null, null, null, null, null);
             mockLogger = new Mock<ILogger<TeamsController>>();
-
             Seed();
         }
 
@@ -102,8 +88,7 @@ namespace Dochazka.Tests.UnitTests
             var result = await controller.Details(id: 10);
 
             // Assert           
-            var notFoundObjectResult = Assert.IsType<NotFoundResult>(result);
-            //Assert.IsType<NotFoundObjectResult>();            
+            var notFoundObjectResult = Assert.IsType<NotFoundResult>(result);            
         }
 
 
