@@ -55,7 +55,7 @@ namespace Dochazka.Controllers
                 return NotFound();
             }
 
-            ViewBag.teamMembers = await _userManager.Users.Where(u => u.Team.TeamId == id).ToListAsync();            
+            ViewBag.teamMembers = _userManager.Users.Where(u => u.Team.TeamId == id).ToList();            
             return View(team);
         }
 

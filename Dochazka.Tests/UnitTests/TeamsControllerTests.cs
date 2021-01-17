@@ -39,14 +39,20 @@ namespace Dochazka.Tests.UnitTests
             _dbContext = new ApplicationDbContext(TestContextOptions);
             mockAuthorizationService = new Mock<IAuthorizationService>();
             mockUserStore = new Mock<IUserStore<ApplicationUser>>();
+            var mockUserStoreQuearyable = mockUserStore.As<IQueryableUserStore<ApplicationUser>>();
+            //var mockQueryableApplicationUsers = new Mock<IQueryable<ApplicationUser>>();
+            //mockUserStoreQuearyable.SetupProperty(x => x.Users, mockQueryableApplicationUsers.Object);
+            mockUserStoreQuearyable.Setup(x => x.Users).Returns(GetUsers().AsQueryable());
+
+
             mockUserStore.Setup(x => x.FindByIdAsync("001", CancellationToken.None))
                 .ReturnsAsync(new ApplicationUser()
                 {
                     UserName = "testser001@testmail.com",
                     Id = "001"
                 });
-                        
-            userManager = new UserManager<ApplicationUser>(mockUserStore.Object, null, null, null, null, null, null, null, null);            
+
+            userManager = new UserManager<ApplicationUser>(mockUserStoreQuearyable.Object, null, null, null, null, null, null, null, null);
             mockLogger = new Mock<ILogger<TeamsController>>();
 
             Seed();
@@ -78,7 +84,7 @@ namespace Dochazka.Tests.UnitTests
             var controller = new TeamsController(mockLogger.Object, _dbContext, mockAuthorizationService.Object, userManager);
 
             // Act
-            var result = await controller.Details(id:null);
+            var result = await controller.Details(id: null);
 
             // Assert           
             var notFoundObjectResult = Assert.IsType<NotFoundResult>(result);
@@ -98,6 +104,25 @@ namespace Dochazka.Tests.UnitTests
             // Assert           
             var notFoundObjectResult = Assert.IsType<NotFoundResult>(result);
             //Assert.IsType<NotFoundObjectResult>();            
+        }
+
+
+        [Fact]
+        public async Task Details_ReturnsViewResult_TeamDetails()
+        {
+            // Arrange           
+            var controller = new TeamsController(mockLogger.Object, _dbContext, mockAuthorizationService.Object, userManager);
+
+            // Act
+            var result = await controller.Details(id: 1);
+
+            // Assert           
+            var viewResult = Assert.IsType<ViewResult>(result);
+            var model = Assert.IsAssignableFrom<Team>(
+                viewResult.ViewData.Model);
+            Assert.True(viewResult.ViewData.ContainsKey("teamMembers"));
+            var teamMembers = Assert.IsType<List<ApplicationUser>>(viewResult.ViewData["teamMembers"]);            
+            Assert.Equal(3, teamMembers.Count);
         }
 
 
@@ -167,17 +192,50 @@ namespace Dochazka.Tests.UnitTests
 
         private List<ApplicationUser> GetUsers()
         {
-            var users = new List<ApplicationUser>();
-            users.Add(new ApplicationUser()
+            var users = new List<ApplicationUser>()
             {
-                UserName = "testser001@testmail.com",
-                Id = "001"
-            });
-            users.Add(new ApplicationUser()
-            {
-                UserName = "testser002@testmail.com",
-                Id = "002"
-            });
+                new ApplicationUser()
+                {
+                    UserName = "teamMember210@testmail.com",
+                    Id = "210",
+                    Team = new Team()
+                    {
+                        TeamName = "TestTeam1",
+                        TeamId = 1
+                    }
+                },
+                new ApplicationUser()
+                {
+                    UserName = "teamMember211@testmail.com",
+                    Id = "211",
+                    Team = new Team()
+                    {
+                        TeamName = "TestTeam1",
+                        TeamId = 1
+                    }
+                },
+                new ApplicationUser()
+                {
+                    UserName = "teamMember212@testmail.com",
+                    Id = "212",
+                    Team = new Team()
+                    {
+                        TeamName = "TestTeam1",
+                        TeamId = 1
+                    }
+                },
+                new ApplicationUser()
+                {
+                    UserName = "teamMember220@testmail.com",
+                    Id = "220",
+                    Team = new Team()
+                    {
+                        TeamName = "TestTeam2",
+                        TeamId = 2
+                    }
+                }
+            };
+
             return users;
         }
     }
