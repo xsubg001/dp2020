@@ -39,7 +39,7 @@ namespace Dochazka.HelperClasses
 
             // Only return Null if there is no structure.
             if (dataTable.Columns.Count == 0)
-                return null;
+                return string.Empty;
 
             foreach (var col in dataTable.Columns)
             {
