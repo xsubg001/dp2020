@@ -2,6 +2,7 @@
 @model PaginatedList<Dochazka.Models.AttendanceRecord>
 
 @{
+    bool managerControls = false;
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
@@ -14,6 +15,7 @@
     <div class="row">
         @if (User.IsInRole("TeamAdministratorRole") || User.IsInRole("TeamManagerRole"))
         {
+            managerControls = true;
             <div class="col-auto">
                 Filter by Full Name: <input type="text" name="searchString" value="@ViewData["CurrentFilter"]">
             </div>
@@ -56,7 +58,12 @@
             <thead>
                 <tr>
                     <th>
-                        <a asp-action="Index" asp-route-sortOrder="@ViewData["DateSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">@Html.DisplayNameFor(model => model[0].WorkDay)</a>
+                        <a asp-action="Index"
+                           asp-route-sortOrder="@ViewData["DateSortParm"]"
+                           asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                           asp-route-selectedMonth="@ViewData["SelectedMonth"]">
+                            @Html.DisplayNameFor(model => model[0].WorkDay)
+                        </a>
                     </th>
                     <th>
                         @Html.DisplayNameFor(model => model[0].MorningAttendance)
@@ -65,13 +72,23 @@
                         @Html.DisplayNameFor(model => model[0].AfternoonAttendance)
                     </th>
                     <th>
-                        <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">@Html.DisplayNameFor(model => model[0].Employee.FullName)</a>
+                        <a asp-action="Index"
+                           asp-route-sortOrder="@ViewData["NameSortParm"]"
+                           asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                           asp-route-selectedMonth="@ViewData["SelectedMonth"]">
+                            @Html.DisplayNameFor(model => model[0].Employee.FullName)
+                        </a>
                     </th>
                     <th>
                         @Html.DisplayNameFor(model => model[0].Employee.UserName)
                     </th>
                     <th>
-                        <a asp-action="Index" asp-route-sortOrder="@ViewData["ApprovalStatusSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">@Html.DisplayNameFor(model => model[0].ManagerApprovalStatus)</a>
+                        <a asp-action="Index"
+                           asp-route-sortOrder="@ViewData["ApprovalStatusSortParm"]"
+                           asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                           asp-route-selectedMonth="@ViewData["SelectedMonth"]">
+                            @Html.DisplayNameFor(model => model[0].ManagerApprovalStatus)
+                        </a>
                     </th>
                 </tr>
             </thead>
@@ -100,28 +117,23 @@
                                 <input type="hidden" name="EmployeeIds" value="@item.EmployeeId" />
                                 @{
                                     var user = await userManager.GetUserAsync(User);
-                                    var currentUserId = user?.Id;                                    
+                                    var currentUserId = user?.Id;
                                     if (await userManager.IsInRoleAsync(await userManager.FindByIdAsync(currentUserId), Roles.TeamAdministratorRole.ToString()) ||
                                     (await userManager.IsInRoleAsync(await userManager.FindByIdAsync(currentUserId), Roles.TeamManagerRole.ToString()) && item.Employee.Team.PrimaryManagerId == currentUserId))
                                     {
-                                        <select name="ManagerApprovalStatuses"
-                                                class="form-control"
-                                                asp-items="Html.GetEnumSelectList<ManagerApprovalStatus>()">
+                                        <select name="ManagerApprovalStatuses" class="form-control" asp-items="Html.GetEnumSelectList<ManagerApprovalStatus>()">
                                             <option selected="selected" value="@item.ManagerApprovalStatus">@item.ManagerApprovalStatus</option>
                                         </select>
-
                                     }
                                     else
                                     {
                                         <input type="hidden" name="ManagerApprovalStatuses" value="@item.ManagerApprovalStatus" />
-                                        <select name="ManagerApprovalStatuses"
-                                                class="form-control"
-                                                asp-items="Html.GetEnumSelectList<ManagerApprovalStatus>()"
+                                        <select name="ManagerApprovalStatuses" class="form-control" asp-items="Html.GetEnumSelectList<ManagerApprovalStatus>()"
                                                 disabled="disabled">
                                             <option selected="selected" value="@item.ManagerApprovalStatus">@item.ManagerApprovalStatus</option>
                                         </select>
                                     }
-                                }                                
+                                }
                             </div>
                         </td>
                         <td>
@@ -162,8 +174,10 @@
         </div>
         <div class="col-auto">
             <input type="hidden" name="selectedMonth" value="@ViewData["EmployeeId"]" />
-            <input type="submit" value="Update Approvals" class="btn btn-primary"
-                   style="width:auto" />
+            @if (managerControls)
+            {
+                <input type="submit" value="Update Approvals" class="btn btn-primary" style="width:auto" />
+            }
             <a asp-action="Index" class="btn btn-primary" style="width:auto">Cancel</a>
         </div>
     </div>
