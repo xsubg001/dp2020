@@ -34,8 +34,7 @@ namespace Dochazka.Controllers
 
 
         // GET: AttendanceRecords
-        public async Task<IActionResult> Index(string sortOrder, string currentFilter, string searchString,
-            int? pageNumber, string infoMessage, DateTime selectedMonth, bool getAsCsv)
+        public async Task<IActionResult> Index(string sortOrder, string currentFilter, string searchString, int? pageNumber, string infoMessage, DateTime selectedMonth, bool getAsCsv)
         {
             ViewData["CurrentSort"] = sortOrder;
             ViewData["DateSortParm"] = string.IsNullOrEmpty(sortOrder) ? "date" : "";
@@ -186,12 +185,17 @@ namespace Dochazka.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to, for 
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Index(string[] workDay, string[] employeeId, string[] managerApprovalStatus)
-        public async Task<IActionResult> Index(BulkApprovalViewModel bulkApprovals)
+        [ValidateAntiForgeryToken]        
+        public async Task<IActionResult> Index(BulkApprovalViewModel bulkApprovals, string currentFilter, string sortOrder, DateTime selectedMonth, int? pageNumber)
         {
             string infoMessage = "";
             int successUpdates = 0;
+
+            if ((selectedMonth == null) || (selectedMonth == DateTime.MinValue))
+            {
+                selectedMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+            }
+
             for (int i = 0; i < bulkApprovals.EmployeeIds?.Count(); i++)
             {
                 var employeeId = bulkApprovals.EmployeeIds[i];
@@ -204,6 +208,7 @@ namespace Dochazka.Controllers
                 }
 
                 var attendanceRecord = await _context.AttendanceRecords.FindAsync(employeeId, workday);
+
                 if (attendanceRecord == null)
                 {
                     return NotFound();
@@ -244,7 +249,8 @@ namespace Dochazka.Controllers
                 infoMessage = $"Approval statuses updated successfully for {successUpdates} records";
             }
 
-            return RedirectToAction(nameof(Index), new { infoMessage = infoMessage });
+            return RedirectToAction(nameof(Index),
+                new { infoMessage = infoMessage, sortOrder = sortOrder, currentFilter = currentFilter, pageNumber = pageNumber, selectedMonth = selectedMonth });
         }
 
 
@@ -405,8 +411,7 @@ namespace Dochazka.Controllers
             var users = _context.Users.AsNoTracking();
 
             if (!await _userManager.IsInRoleAsync(await _userManager.FindByIdAsync(currentUserId), Roles.TeamAdministratorRole.ToString()))
-            {
-                //attendanceRecord.EmployeeId = _userManager.GetUserId(User);
+            {                
                 users = await _userManager.IsInRoleAsync(await _userManager.FindByIdAsync(currentUserId), Roles.TeamManagerRole.ToString())
                     ? users.Where(u => u.Team.PrimaryManagerId == currentUserId || u.Id == currentUserId)
                     : users.Where(u => u.Id == currentUserId);

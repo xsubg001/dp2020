@@ -1,5 +1,4 @@
-﻿@*@model IEnumerable<Dochazka.Models.AttendanceRecord>*@
-@model PaginatedList<Dochazka.Models.AttendanceRecord>
+﻿@model PaginatedList<Dochazka.Models.AttendanceRecord>
 
 @{
     bool managerControls = false;
@@ -36,7 +35,7 @@
        asp-route-getAsCsv=true
        asp-route-sortOrder="@ViewData["CurrentSort"]"
        asp-route-selectedMonth="@ViewData["SelectedMonth"]"
-       asp-route-pageNumber="@(Model.PageIndex + 1)"
+       asp-route-pageNumber="@(Model.PageIndex)"
        asp-route-currentFilter="@ViewData["CurrentFilter"]">
         Export results as CSV file
     </a>
@@ -45,7 +44,7 @@
        asp-route-getAsCsv=false
        asp-route-sortOrder="@ViewData["CurrentSort"]"
        asp-route-selectedMonth="@ViewData["SelectedMonth"]"
-       asp-route-pageNumber="@(Model.PageIndex + 1)"
+       asp-route-pageNumber="@(Model.PageIndex)"
        asp-route-currentFilter="@ViewData["CurrentFilter"]">
         Payroll summary
     </a>
@@ -172,11 +171,14 @@
                 Next
             </a>
         </div>
-        <div class="col-auto">
-            <input type="hidden" name="selectedMonth" value="@ViewData["EmployeeId"]" />
+        <div class="col-auto">            
             @if (managerControls)
             {
-                <input type="submit" value="Update Approvals" class="btn btn-primary" style="width:auto" />
+                <input type="submit" value="Update Approvals" class="btn btn-primary" style="width:auto"
+                       asp-route-sortOrder="@ViewData["CurrentSort"]"                       
+                       asp-route-pageNumber="@(Model.PageIndex)"
+                       asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                       asp-route-selectedMonth="@ViewData["SelectedMonth"]"/>
             }
             <a asp-action="Index" class="btn btn-primary" style="width:auto">Cancel</a>
         </div>
