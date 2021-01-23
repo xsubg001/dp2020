@@ -21,7 +21,7 @@
 <table class="table table-striped">
     <thead>
         <tr>
-            <th>                
+            <th>
                 <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">Full Name</a>
             </th>
             <th>Email</th>
@@ -41,8 +41,14 @@
                 <td>@user.TeamName</td>
                 <td>@string.Join(" , ", user.Roles.ToList())</td>
                 <td>
-                    @Html.ActionLink("Manage", "Manage", new { user.Id }) |
-                    @Html.ActionLink("Delete", "Delete", new { user.Id })
+                    @if (User.IsInRole("TeamAdministratorRole"))
+                    {
+                        <a asp-action="Manage" asp-route-id="@user.Id">Manage | </a>
+                        <a asp-action="Delete" asp-route-id="@user.Id">Delete</a>
+                    }
+
+                    @*@Html.ActionLink("Manage", "Manage", new { user.Id }) |
+                        @Html.ActionLink("Delete", "Delete", new { user.Id })*@
                 </td>
             </tr>
         }

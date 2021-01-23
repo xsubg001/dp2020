@@ -15,8 +15,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 namespace Dochazka.Controllers
-{
-    [Authorize(Roles = "TeamAdministratorRole")]
+{    
     public class UserRolesController : DI_BaseController
     {        
         private readonly RoleManager<IdentityRole> _roleManager;
@@ -81,6 +80,7 @@ namespace Dochazka.Controllers
             //return View(userRolesViewModel);
         }
 
+        [Authorize(Roles = "TeamAdministratorRole")]
         public async Task<IActionResult> Manage(string id)
         {                 
             var user = await _context.Users.Include(u => u.Team).FirstOrDefaultAsync(u => u.Id == id);            
@@ -121,6 +121,8 @@ namespace Dochazka.Controllers
 
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "TeamAdministratorRole")]
         public async Task<IActionResult> Manage(ManageUserViewModel input, string id)
         {
             var user = await _userManager.FindByIdAsync(input.UserId);
@@ -161,6 +163,7 @@ namespace Dochazka.Controllers
         }
 
         // GET: UserRoles/Delete/5
+        [Authorize(Roles = "TeamAdministratorRole")]
         public async Task<IActionResult> Delete(string id)
         {
             ViewBag.id = id;
@@ -185,6 +188,7 @@ namespace Dochazka.Controllers
         // POST: UserRoles/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "TeamAdministratorRole")]
         public async Task<IActionResult> DeleteConfirmed(string id, UserRolesViewModel user)
         {
             var originalUser = await _userManager.FindByIdAsync(id);

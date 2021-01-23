@@ -14,8 +14,7 @@ using Microsoft.AspNetCore.Identity;
 using Dochazka.HelperClasses;
 
 namespace Dochazka.Controllers
-{
-    [Authorize(Roles = "TeamAdministratorRole")]
+{    
     public class TeamsController : DI_BaseController
     {
         private readonly ILogger<TeamsController> _logger;
@@ -60,6 +59,7 @@ namespace Dochazka.Controllers
         }
 
         // GET: Teams/Create
+        [Authorize(Roles = "TeamAdministratorRole")]
         public async Task<IActionResult> Create()
         {
             ViewData["PrimaryManagerId"] = new SelectList(await GetUnassignedManagersAsync(), "Id", "UserName");
@@ -71,6 +71,7 @@ namespace Dochazka.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "TeamAdministratorRole")]
         public async Task<IActionResult> Create([Bind("TeamID,TeamName,PrimaryManagerId")] Team team)
         { 
             if (_context.Teams.AsNoTracking().Any(t => t.TeamName.ToLower() == team.TeamName.ToLower()))
@@ -91,6 +92,7 @@ namespace Dochazka.Controllers
         }
 
         // GET: Teams/Edit/5
+        [Authorize(Roles = "TeamAdministratorRole")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -112,6 +114,7 @@ namespace Dochazka.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "TeamAdministratorRole")]
         public async Task<IActionResult> Edit(int id, [Bind("TeamId,TeamName,PrimaryManagerId")] Team team)
         {
             if (id != team.TeamId)
@@ -144,6 +147,7 @@ namespace Dochazka.Controllers
         }
 
         // GET: Teams/Delete/5
+        [Authorize(Roles = "TeamAdministratorRole")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -176,6 +180,7 @@ namespace Dochazka.Controllers
         // POST: Teams/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "TeamAdministratorRole")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var team = await _context.Teams.FindAsync(id);

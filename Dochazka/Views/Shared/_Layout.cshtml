@@ -27,33 +27,19 @@
                         </li>
                         @if (User.Identity.IsAuthenticated)
                         {
-                            @if (User.IsInRole("ContactManagersRole"))
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Contacts" asp-action="Index">Contacts</a>
-                                </li>
-                            }
-                        }
-                        @if (User.Identity.IsAuthenticated)
-                        {
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="AttendanceRecords" asp-action="Index">My Attenance</a>
                             </li>
                         }
                         @if (User.Identity.IsAuthenticated)
                         {
-                            @if (User.IsInRole("TeamAdministratorRole"))
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Teams" asp-action="Index">Teams</a>
-                                </li>
-                                @*<li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="RoleManager" asp-action="Index">Roles</a>
-                                    </li>*@
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="UserRoles" asp-action="Index">Users</a>
-                                </li>
-                            }
+
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Teams" asp-action="Index">Teams</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="UserRoles" asp-action="Index">Users</a>
+                            </li>
                         }
                     </ul>
                 </div>
