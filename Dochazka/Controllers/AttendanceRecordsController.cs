@@ -65,26 +65,12 @@ namespace Dochazka.Controllers
             ViewData["CurrentFilter"] = searchString;
 
             var currentUserId = _userManager.GetUserId(User);
-            var attendanceRecords = _context.AttendanceRecords.Where(ar =>
-                    ar.WorkDay >= selectedMonth && ar.WorkDay < selectedMonth.AddDays(daysInMonth))
+            var attendanceRecords = _context.AttendanceRecords.Where(ar => ar.WorkDay >= selectedMonth && ar.WorkDay < selectedMonth.AddDays(daysInMonth))
                 .Include(p => p.Employee)
                 .ThenInclude(e => e.Team)
                 .AsNoTracking();
 
-            if (await _userManager.IsInRoleAsync(await _userManager.FindByIdAsync(currentUserId),
-                Roles.TeamAdministratorRole.ToString()))
-            {
-            }
-            else if (await _userManager.IsInRoleAsync(await _userManager.FindByIdAsync(currentUserId),
-                Roles.TeamManagerRole.ToString()))
-            {
-                attendanceRecords = attendanceRecords.Where(ar =>
-                    ar.EmployeeId == currentUserId || ar.Employee.Team.PrimaryManagerId == currentUserId);
-            }
-            else
-            {
-                attendanceRecords = attendanceRecords.Where(ar => ar.EmployeeId == currentUserId);
-            }
+            attendanceRecords = await GetAttendanceRecordsInScope(currentUserId, attendanceRecords);
 
             if (!String.IsNullOrEmpty(searchString))
             {
@@ -258,7 +244,7 @@ namespace Dochazka.Controllers
                 infoMessage = $"Approval statuses updated successfully for {successUpdates} records";
             }
 
-            return RedirectToAction(nameof(Index), new {infoMessage = infoMessage});
+            return RedirectToAction(nameof(Index), new { infoMessage = infoMessage });
         }
 
 
@@ -277,32 +263,17 @@ namespace Dochazka.Controllers
             ViewData["CurrentFilter"] = searchString;
 
             var currentUserId = _userManager.GetUserId(User);
-            var attendanceRecords = _context.AttendanceRecords.Where(ar =>
-                    ar.WorkDay >= selectedMonth && ar.WorkDay < selectedMonth.AddDays(daysInMonth))
+            var attendanceRecords = _context.AttendanceRecords.Where(ar => ar.WorkDay >= selectedMonth && ar.WorkDay < selectedMonth.AddDays(daysInMonth))
                 .Where(ar => ar.ManagerApprovalStatus == ManagerApprovalStatus.Approved)
                 .Include(p => p.Employee)
                 .ThenInclude(e => e.Team)
                 .AsNoTracking();
 
-            if (await _userManager.IsInRoleAsync(await _userManager.FindByIdAsync(currentUserId),
-                Roles.TeamAdministratorRole.ToString()))
-            {
-            }
-            else if (await _userManager.IsInRoleAsync(await _userManager.FindByIdAsync(currentUserId),
-                Roles.TeamManagerRole.ToString()))
-            {
-                attendanceRecords = attendanceRecords.Where(ar =>
-                    ar.EmployeeId == currentUserId || ar.Employee.Team.PrimaryManagerId == currentUserId);
-            }
-            else
-            {
-                attendanceRecords = attendanceRecords.Where(ar => ar.EmployeeId == currentUserId);
-            }
+            attendanceRecords = await GetAttendanceRecordsInScope(currentUserId, attendanceRecords);
 
             if (!String.IsNullOrEmpty(searchString))
             {
-                attendanceRecords = attendanceRecords.Where(ar =>
-                    (ar.Employee.LastName + ar.Employee.FirstName).Contains(searchString));
+                attendanceRecords = attendanceRecords.Where(ar => (ar.Employee.LastName + ar.Employee.FirstName).Contains(searchString));
             }
 
             var byEmployeeIDResults = new Dictionary<string, Dictionary<string, int>>();
@@ -310,11 +281,8 @@ namespace Dochazka.Controllers
 
             foreach (var group in arByUsername)
             {
-                var afternoonSummary = group.GroupBy(ar => ar.AfternoonAttendance.ToString(),
-                    ar => ar.AfternoonAttendance,
-                    (afternoon, allAfternoons) => new {key = afternoon, countAR = allAfternoons.Count()});
-                var morningSummary = group.GroupBy(ar => ar.MorningAttendance.ToString(), ar => ar.MorningAttendance,
-                    (morning, allMornings) => new {key = morning, countAR = allMornings.Count()});
+                var afternoonSummary = group.GroupBy(ar => ar.AfternoonAttendance.ToString(), ar => ar.AfternoonAttendance, (afternoon, allAfternoons) => new { key = afternoon, countAR = allAfternoons.Count() });
+                var morningSummary = group.GroupBy(ar => ar.MorningAttendance.ToString(), ar => ar.MorningAttendance, (morning, allMornings) => new { key = morning, countAR = allMornings.Count() });
                 byEmployeeIDResults[group.Key] = new Dictionary<string, int>();
                 foreach (var attendance in Enum.GetNames(typeof(Attendance)))
                 {
@@ -384,9 +352,11 @@ namespace Dochazka.Controllers
         }
 
         // GET: AttendanceRecords/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            ViewData["EmployeeId"] = new SelectList(_context.Users, "Id", "UserName");
+            var currentUserId = _userManager.GetUserId(User);            
+            var users = await GetUsersInScope(currentUserId);
+            ViewData["EmployeeId"] = new SelectList(users, "Id", "UserName", currentUserId);
             ViewData["MorningAttendance"] = new SelectList(Enum.GetNames(typeof(Attendance)));
             ViewData["AfternoonAttendance"] = new SelectList(Enum.GetNames(typeof(Attendance)));
             return View(new AttendanceRecord());
@@ -397,12 +367,20 @@ namespace Dochazka.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("WorkDay,MorningAttendance,AfternoonAttendance")]
+        public async Task<IActionResult> Create([Bind("EmployeeId, WorkDay, MorningAttendance, AfternoonAttendance")]
             AttendanceRecord attendanceRecord)
         {
-            attendanceRecord.EmployeeId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (_context.AttendanceRecords.AsNoTracking().Any(p =>
-                p.EmployeeId == attendanceRecord.EmployeeId && p.WorkDay == attendanceRecord.WorkDay))
+            var currentUserId = _userManager.GetUserId(User);
+            var users = await GetUsersInScope(currentUserId);
+
+            // validate that posted EmployeeId is valid for current user role
+            if (!users.Any(u => u.Id == attendanceRecord.EmployeeId))
+            {
+                return Forbid();
+            }
+
+            //attendanceRecord.EmployeeId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (_context.AttendanceRecords.AsNoTracking().Any(p => p.EmployeeId == attendanceRecord.EmployeeId && p.WorkDay == attendanceRecord.WorkDay))
             {
                 ModelState.AddModelError(string.Empty,
                     "Unable to save this Presence Record. The entry with this work day date already exists. "
@@ -420,6 +398,33 @@ namespace Dochazka.Controllers
 
             PopulateViewDataWithSelectedItems(attendanceRecord);
             return View(attendanceRecord);
+        }
+
+        private async Task<IQueryable<ApplicationUser>> GetUsersInScope(string currentUserId)
+        {
+            var users = _context.Users.AsNoTracking();
+
+            if (!await _userManager.IsInRoleAsync(await _userManager.FindByIdAsync(currentUserId), Roles.TeamAdministratorRole.ToString()))
+            {
+                //attendanceRecord.EmployeeId = _userManager.GetUserId(User);
+                users = await _userManager.IsInRoleAsync(await _userManager.FindByIdAsync(currentUserId), Roles.TeamManagerRole.ToString())
+                    ? users.Where(u => u.Team.PrimaryManagerId == currentUserId || u.Id == currentUserId)
+                    : users.Where(u => u.Id == currentUserId);
+            }
+
+            return users;
+        }
+
+        private async Task<IQueryable<AttendanceRecord>> GetAttendanceRecordsInScope(string currentUserId, IQueryable<AttendanceRecord> attendanceRecords)
+        {
+            if (!await _userManager.IsInRoleAsync(await _userManager.FindByIdAsync(currentUserId), Roles.TeamAdministratorRole.ToString()))
+            {
+                attendanceRecords = await _userManager.IsInRoleAsync(await _userManager.FindByIdAsync(currentUserId), Roles.TeamManagerRole.ToString())
+                    ? attendanceRecords.Where(ar => ar.EmployeeId == currentUserId || ar.Employee.Team.PrimaryManagerId == currentUserId)
+                    : attendanceRecords.Where(ar => ar.EmployeeId == currentUserId);
+            }
+
+            return attendanceRecords;
         }
 
         // GET: AttendanceRecords/Edit/5
@@ -469,10 +474,7 @@ namespace Dochazka.Controllers
                 return NotFound();
             }
 
-            if (await TryUpdateModelAsync<AttendanceRecord>(
-                attendanceRecord,
-                "",
-                s => s.MorningAttendance, s => s.AfternoonAttendance, s => s.ManagerApprovalStatus))
+            if (await TryUpdateModelAsync<AttendanceRecord>( attendanceRecord, "", s => s.MorningAttendance, s => s.AfternoonAttendance, s => s.ManagerApprovalStatus))
             {
                 if (ModelState.IsValid)
                 {
