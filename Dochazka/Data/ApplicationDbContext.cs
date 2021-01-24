@@ -10,8 +10,7 @@ namespace Dochazka.Data
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
-        }
-        public DbSet<Dochazka.Models.Contact> Contact { get; set; }
+        }        
         public DbSet<AttendanceRecord> AttendanceRecords { get; set; }
         public DbSet<Team> Teams { get; set; }
 
