@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Dochazka.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20201216092603_initial")]
-    partial class initial
+    [Migration("20210124190434_initialcreate")]
+    partial class initialcreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
