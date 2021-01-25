@@ -82,8 +82,9 @@ namespace Dochazka.Controllers
 
         [Authorize(Roles = "TeamAdministratorRole")]
         public async Task<IActionResult> Manage(string id)
-        {                 
-            var user = await _context.Users.Include(u => u.Team).FirstOrDefaultAsync(u => u.Id == id);            
+        {
+            var user = await _context.Users.Include(u => u.Team).FirstOrDefaultAsync(u => u.Id == id);
+
             if (user == null)
             {
                 ViewBag.ErrorMessage = $"User with Id = {id} cannot be found";
@@ -94,17 +95,19 @@ namespace Dochazka.Controllers
                 UserId = user.Id,
                 TeamId = user.Team.TeamId
             };
+
             ViewBag.Teams = new SelectList(await _context.Teams.ToListAsync(), "TeamId", "TeamName", model.TeamId ?? default(int));
             ViewBag.UserName = user.UserName;
 
 
-            foreach (var role in _roleManager.Roles)
+            foreach (var role in _roleManager.Roles.ToList())
             {
                 var roleSelection = new RoleSelection
                 {
                     RoleId = role.Id,
                     RoleName = role.Name
                 };
+
                 if (await _userManager.IsInRoleAsync(user, role.Name))
                 {
                     roleSelection.Selected = true;
@@ -113,6 +116,7 @@ namespace Dochazka.Controllers
                 {
                     roleSelection.Selected = false;
                 }
+
                 model.RoleSelections.Add(roleSelection);
             }            
 
@@ -123,7 +127,7 @@ namespace Dochazka.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "TeamAdministratorRole")]
-        public async Task<IActionResult> Manage(ManageUserViewModel input, string id)
+        public async Task<IActionResult> Manage(ManageUserViewModel input)
         {
             var user = await _userManager.FindByIdAsync(input.UserId);
             if (user == null)

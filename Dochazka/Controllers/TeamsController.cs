@@ -72,7 +72,7 @@ namespace Dochazka.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "TeamAdministratorRole")]
-        public async Task<IActionResult> Create([Bind("TeamID,TeamName,PrimaryManagerId")] Team team)
+        public async Task<IActionResult> Create([Bind("TeamName,PrimaryManagerId")] Team team)
         { 
             if (_context.Teams.AsNoTracking().Any(t => t.TeamName.ToLower() == team.TeamName.ToLower()))
             {

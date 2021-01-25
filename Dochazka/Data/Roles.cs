@@ -9,8 +9,6 @@ namespace Dochazka.Data
     {        
         TeamAdministratorRole,
         TeamManagerRole,
-        TeamMemberRole,        
-        ContactManagersRole, // legacy, to be deprecated
-        ContactAdministratorsRole // legacy, to be deprecated
+        TeamMemberRole
     }
 }
