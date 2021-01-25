@@ -20,7 +20,8 @@ New-AzSqlServerFirewallRule -FirewallRuleName AllowMyLocalDesktop -ResourceGroup
 New-AzSqlDatabase -ResourceGroupName $rgName -ServerName $serverName -DatabaseName $dbName -Edition Basic
 Get-AzSqlDatabase -ResourceGroupName $rgName -ServerName $serverName -DatabaseName $dbName
 
-$connectionString = "Server=tcp:dp2020gacisqlwe.database.windows.net,1433;Database=dochazkaDB;User ID=$sqlServerAdminUser;Password=$password;Encrypt=true;Connection Timeout=30;"
+$connectionString = "Server=tcp:$serverName.database.windows.net,1433;Database=$dbName;User ID=$sqlServerAdminUser;Password=$password;Encrypt=true;Connection Timeout=30;"
+$connectionString
 
 
 # 2. WebApp
@@ -29,29 +30,32 @@ $webAppName = "dp2020wa"
 New-AzAppServicePlan -ResourceGroupName $rgName -Location $location -Name $webAppServicePlan -Tier Free
 New-AzWebApp -ResourceGroupName $rgName -AppServicePlan $webAppServicePlan -Name $webAppName -Location $location 
 
-
-$gitRepo = "https://github.com/xsubg001/dp2020.git"
-$gitToken = Read-Host -Prompt "Enter GitHub token"
-
 # SET GitHub
+$gitToken = Read-Host -Prompt "Enter GitHub token"
 $PropertiesObject = @{    
     token = "$gitToken";
 }
-Set-AzResource -PropertyObject $PropertiesObject -ResourceId "/providers/Microsoft.Web/sourcecontrols/GitHub" -ApiVersion 2015-08-01  -Force
+
+Set-AzResource -PropertyObject $PropertiesObject -ResourceId "/providers/Microsoft.Web/sourcecontrols/GitHub" -ApiVersion 2018-02-01 -Force
 
 # Configure GitHub deployment from your GitHub repo and deploy once.
+$gitRepoURL = "https://github.com/xsubg001/dp2020.git"
 $PropertiesObject = @{
-    repoUrl = "$gitRepo";
-    branch = "develop";
+    repoUrl = "$gitRepoURL";
+    branch = "master";
     isManualIntegration = $false
 }
 
 Set-AzResource -PropertyObject $PropertiesObject -ResourceGroupName $rgName -ResourceType Microsoft.Web/sites/sourcecontrols `
     -ResourceName $webAppName/web -ApiVersion 2018-02-01 -Force
 
+$webAppConnectionStrings = @{
+    DefaultConnection = @{
+        Type = "SQLAzure";
+        Value = $connectionString
+    }
+}
 
-
-$webAppConnectionStrings = @{DefaultConnection = @{Type = "SQLAzure"; Value = $connectionString}}
 Set-AzWebApp -ResourceGroupName $rgName -Name $webAppName -ConnectionStrings $webAppConnectionStrings
 
 
