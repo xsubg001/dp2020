@@ -6,7 +6,7 @@
 }
 
 <h1>Payroll Summary</h1>
-
+<h4>Only approved attendance records can be processed</h4>
 <form asp-controller="AttendanceRecords" asp-action="PayrollSummary" method="get">
     <div class="row">
         @if (User.IsInRole("TeamAdministratorRole") || User.IsInRole("TeamManagerRole"))
