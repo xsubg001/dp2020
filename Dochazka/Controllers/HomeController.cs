@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Dochazka.Models;
@@ -13,12 +9,12 @@ using Dochazka.Areas.Identity.Data;
 
 namespace Dochazka.Controllers
 {
-    public class HomeController : DI_BaseController
+    public class HomeController : BaseController
     {
         private readonly ILogger<HomeController> _logger;
 
         public HomeController(
-            ILogger<HomeController> logger, 
+            ILogger<HomeController> logger,
             ApplicationDbContext context,
             IAuthorizationService authorizationService,
             UserManager<ApplicationUser> userManager)
@@ -26,15 +22,9 @@ namespace Dochazka.Controllers
         {
             _logger = logger;
         }
-        
-        [AllowAnonymous]
-        public IActionResult Index()
-        {
-            return View();
-        }
 
         [AllowAnonymous]
-        public IActionResult Privacy()
+        public IActionResult Index()
         {
             return View();
         }

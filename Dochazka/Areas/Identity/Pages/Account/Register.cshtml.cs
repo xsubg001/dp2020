@@ -69,10 +69,10 @@ namespace Dochazka.Areas.Identity.Pages.Account
             [EmailAddress]
             [Display(Name = "Email")]
             public string Email { get; set; }
-
-            [Display(Name = "Team Name")]
+            
             public Team Team { get; set; }
 
+            [Display(Name = "Team Name")]
             public int? TeamId { get; set; }
 
             [Required]

@@ -51,10 +51,10 @@ namespace Dochazka.Areas.Identity.Pages.Account.Manage
             [StringLength(50, ErrorMessage = "First name cannot be longer than 50 characters.")]
             [Display(Name = "Last Name")]
             public string LastName { get; set; }
-
-            [Display(Name = "Team Name")]
+                        
             public Team Team { get; set; }
 
+            [Display(Name = "Team Name")]
             public int? TeamId { get; set; }
 
             [Phone]

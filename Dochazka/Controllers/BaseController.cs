@@ -7,13 +7,13 @@ using Dochazka.Areas.Identity.Data;
 
 namespace Dochazka.Controllers
 {
-    public abstract class DI_BaseController : Controller
+    public abstract class BaseController : Controller
     {
         protected readonly ApplicationDbContext _context;
         protected readonly IAuthorizationService _authorizationService;
         protected readonly UserManager<ApplicationUser> _userManager;        
 
-        public DI_BaseController(
+        public BaseController(
 
             ApplicationDbContext context,
             IAuthorizationService authorizationService,

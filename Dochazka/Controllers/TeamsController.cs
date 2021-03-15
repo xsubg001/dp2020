@@ -15,7 +15,7 @@ using Dochazka.HelperClasses;
 
 namespace Dochazka.Controllers
 {    
-    public class TeamsController : DI_BaseController
+    public class TeamsController : BaseController
     {
         private readonly ILogger<TeamsController> _logger;
 

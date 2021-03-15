@@ -18,7 +18,7 @@ using Dochazka.HelperClasses;
 
 namespace Dochazka.Controllers
 {
-    public class AttendanceRecordsController : DI_BaseController
+    public class AttendanceRecordsController : BaseController
     {
         private readonly ILogger<AttendanceRecordsController> _logger;
 

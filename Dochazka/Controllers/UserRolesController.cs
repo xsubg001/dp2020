@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace Dochazka.Controllers
 {    
-    public class UserRolesController : DI_BaseController
+    public class UserRolesController : BaseController
     {        
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ILogger<UserRolesController> _logger;
