@@ -70,10 +70,10 @@ namespace Dochazka.Areas.Identity.Pages.Account
             [Display(Name = "Email")]
             public string Email { get; set; }
             
-            public Team Team { get; set; }
+            public TeamModel Team { get; set; }
 
             [Display(Name = "Team Name")]
-            public int? TeamId { get; set; }
+            public int? TeamModelId { get; set; }
 
             [Required]
             [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
@@ -91,16 +91,16 @@ namespace Dochazka.Areas.Identity.Pages.Account
         {
             ReturnUrl = returnUrl;
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-            ViewData["Teams"] = new SelectList(await _context.Teams.ToListAsync(), "TeamId", "TeamName");
+            ViewData["Teams"] = new SelectList(await _context.Teams.ToListAsync(), "TeamModelId", "TeamName");
         }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl = returnUrl ?? Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-            if (Input.TeamId != null)
+            if (Input.TeamModelId != null)
             {
-                Input.Team = await _context.Teams.FindAsync(Input.TeamId);
+                Input.Team = await _context.Teams.FindAsync(Input.TeamModelId);
             }
             else {
                 Input.Team = await _context.Teams.Where(t => t.TeamName == CommonConstants.DEFAULT_TEAM ).FirstOrDefaultAsync();

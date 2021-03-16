@@ -11,18 +11,18 @@ namespace Dochazka.Tests.UnitTests
 {    
     public class DataTableExtensionsTests
     {
-        private readonly List<AttendanceRecord> attendanceRecordsAsList;
+        private readonly List<AttendanceRecordModel> attendanceRecordsAsList;
 
         public DataTableExtensionsTests()
         {            
-            attendanceRecordsAsList = new List<AttendanceRecord>() {
-                        new AttendanceRecord { WorkDay = new DateTime(2020,01,01),
+            attendanceRecordsAsList = new List<AttendanceRecordModel>() {
+                        new AttendanceRecordModel { WorkDay = new DateTime(2020,01,01),
                               MorningAttendance = Attendance.Absence,
                               AfternoonAttendance = Attendance.DoctorSickness,
                               ManagerApprovalStatus = ManagerApprovalStatus.Rejected,
                               Employee = new Areas.Identity.Data.ApplicationUser { FirstName = "Karel", LastName = "Vomacka", UserName = "karel.vomacka@email.com" }  
                              },
-                        new AttendanceRecord { WorkDay = new DateTime(2020,01,02),
+                        new AttendanceRecordModel { WorkDay = new DateTime(2020,01,02),
                               MorningAttendance = Attendance.LegalJustification,
                               AfternoonAttendance = Attendance.Sickleave,
                               ManagerApprovalStatus = ManagerApprovalStatus.Approved,

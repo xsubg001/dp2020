@@ -120,7 +120,7 @@ namespace ContactManager.Data
             if (!(context.Teams.Any(t => t.TeamName == teamName)))
             {
                 var team = context.Teams.Add(
-                    new Team
+                    new TeamModel
                     {
                         TeamName = teamName,
                         PrimaryManagerId = primaryManagerId                        

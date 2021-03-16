@@ -1,5 +1,4 @@
-﻿@*@model IEnumerable<Dochazka.Models.Team>*@
-@model PaginatedList<Dochazka.Models.Team>
+﻿@model PaginatedList<Dochazka.Models.TeamModel>
 
 @{
     ViewData["Title"] = "Index";
@@ -43,11 +42,11 @@
                         @Html.DisplayFor(modelItem => item.PrimaryManager.UserName)
                     </td>
                     <td>
-                        <a asp-action="Details" asp-route-id="@item.TeamId">Details</a>
+                        <a asp-action="Details" asp-route-id="@item.TeamModelId">Details</a>
                         @if (User.IsInRole("TeamAdministratorRole"))
                         {
-                            <a asp-action="Edit" asp-route-id="@item.TeamId">| Edit | </a>
-                            <a asp-action="Delete" asp-route-id="@item.TeamId">Delete</a>
+                            <a asp-action="Edit" asp-route-id="@item.TeamModelId">| Edit | </a>
+                            <a asp-action="Delete" asp-route-id="@item.TeamModelId">Delete</a>
                         }
                     </td>
                 </tr>

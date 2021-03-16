@@ -1,4 +1,4 @@
-﻿@model Dochazka.Models.Team
+﻿@model Dochazka.Models.TeamModel
 
 @{
     ViewData["Title"] = "Delete";
@@ -30,7 +30,7 @@
             @Html.DisplayFor(model => model.PrimaryManager.FullName)
         </dd>
         <dt class="col-sm-3">
-            @Dochazka.Models.TeamConstants.TeamManagerUserName
+            @Dochazka.Data.CommonConstants.TeamManagerUserName
         </dt>
         <dd class="col-sm-9">
             @Html.DisplayFor(model => model.PrimaryManager.UserName)
@@ -40,7 +40,7 @@
     <form asp-action="Delete">
         @if (ViewBag.CanBeDeleted)
         {
-            <input type="hidden" asp-for="TeamId" />
+            <input type="hidden" asp-for="TeamModelId" />
             <input type="submit" value="Delete" class="btn btn-danger" />
             <text> | </text>
         }

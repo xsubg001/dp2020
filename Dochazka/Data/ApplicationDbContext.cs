@@ -11,17 +11,17 @@ namespace Dochazka.Data
             : base(options)
         {
         }        
-        public DbSet<AttendanceRecord> AttendanceRecords { get; set; }
-        public DbSet<Team> Teams { get; set; }
+        public DbSet<AttendanceRecordModel> AttendanceRecords { get; set; }
+        public DbSet<TeamModel> Teams { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<AttendanceRecord>()
+            modelBuilder.Entity<AttendanceRecordModel>()
                 .HasKey(p => new { p.EmployeeId, p.WorkDay});
 
-            modelBuilder.Entity<Team>()
+            modelBuilder.Entity<TeamModel>()
                 .HasIndex(t => t.TeamName)
                 .IsUnique();
 

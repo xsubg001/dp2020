@@ -9,5 +9,6 @@ namespace Dochazka.Data
     {
         public const string DEFAULT_TEAM = "DefaultTeam";
         public const int PAGE_SIZE = 5;
+        public const string TeamManagerUserName = "Team Manager Username";
     }
 }

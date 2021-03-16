@@ -35,7 +35,7 @@ namespace Dochazka.Controllers
             var teams = _context.Teams.Include(t => t.PrimaryManager).AsNoTracking();                                                     
             
             //return View(await teams.ToListAsync());
-            return View(await PaginatedList<Team>.CreateAsync(teams, pageNumber ?? 1, CommonConstants.PAGE_SIZE));
+            return View(await PaginatedList<TeamModel>.CreateAsync(teams, pageNumber ?? 1, CommonConstants.PAGE_SIZE));
         }
 
         // GET: Teams/Details/5
@@ -48,13 +48,13 @@ namespace Dochazka.Controllers
 
             var team = await _context.Teams
                 .Include(t => t.PrimaryManager)
-                .FirstOrDefaultAsync(m => m.TeamId == id);
+                .FirstOrDefaultAsync(m => m.TeamModelId == id);
             if (team == null)
             {
                 return NotFound();
             }
 
-            ViewBag.teamMembers = _userManager.Users.Where(u => u.Team.TeamId == id).ToList();            
+            ViewBag.teamMembers = _userManager.Users.Where(u => u.Team.TeamModelId == id).ToList();            
             return View(team);
         }
 
@@ -72,7 +72,7 @@ namespace Dochazka.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "TeamAdministratorRole")]
-        public async Task<IActionResult> Create([Bind("TeamName,PrimaryManagerId")] Team team)
+        public async Task<IActionResult> Create([Bind("TeamName,PrimaryManagerId")] TeamModel team)
         { 
             if (_context.Teams.AsNoTracking().Any(t => t.TeamName.ToLower() == team.TeamName.ToLower()))
             {
@@ -105,7 +105,8 @@ namespace Dochazka.Controllers
             {
                 return NotFound();
             }
-            ViewData["PrimaryManagerId"] = new SelectList(await GetUnassignedManagersForEditAsync(team.PrimaryManagerId), "Id", "UserName", team.PrimaryManagerId);
+            var unassignedManagers = await GetUnassignedManagersForEditAsync(team.PrimaryManagerId);
+            ViewData["PrimaryManagerId"] = new SelectList(unassignedManagers, "Id", "UserName", team.PrimaryManagerId ?? unassignedManagers.FirstOrDefault().Id);
             return View(team);
         }
 
@@ -115,9 +116,9 @@ namespace Dochazka.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "TeamAdministratorRole")]
-        public async Task<IActionResult> Edit(int id, [Bind("TeamId,TeamName,PrimaryManagerId")] Team team)
+        public async Task<IActionResult> Edit(int id, [Bind("TeamId,TeamName,PrimaryManagerId")] TeamModel team)
         {
-            if (id != team.TeamId)
+            if (id != team.TeamModelId)
             {
                 return NotFound();
             }
@@ -131,7 +132,7 @@ namespace Dochazka.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!TeamExists(team.TeamId))
+                    if (!TeamExists(team.TeamModelId))
                     {
                         return NotFound();
                     }
@@ -157,13 +158,13 @@ namespace Dochazka.Controllers
 
             var team = await _context.Teams
                 .Include(t => t.PrimaryManager)
-                .FirstOrDefaultAsync(m => m.TeamId == id);
+                .FirstOrDefaultAsync(m => m.TeamModelId == id);
             if (team == null)
             {
                 return NotFound();
             }
 
-            var teamMembers = await _userManager.Users.Where(u => u.Team.TeamId == id).ToListAsync();
+            var teamMembers = await _userManager.Users.Where(u => u.Team.TeamModelId == id).ToListAsync();
             
             if (teamMembers.Count > 0)
             {
@@ -191,14 +192,14 @@ namespace Dochazka.Controllers
 
         private bool TeamExists(int id)
         {
-            return _context.Teams.Any(e => e.TeamId == id);
+            return _context.Teams.Any(e => e.TeamModelId == id);
         }
 
         /// <summary>
         /// Populates VieData with team name information
         /// </summary>
         /// <param name="team"></param>
-        private void PopulateViewDataWithSelectedItems(Team team)
+        private void PopulateViewDataWithSelectedItems(TeamModel team)
         {            
             ViewData["TeamName"] = team.TeamName;
             ViewData["PrimaryManagerId"] = new SelectList(GetUnassignedManagersAsync().Result, "Id", "UserName", team.PrimaryManagerId);
@@ -213,6 +214,7 @@ namespace Dochazka.Controllers
             var allManagers = await _userManager.GetUsersInRoleAsync("TeamManagerRole");
             var assignedManagerIds = await _context.Teams
                                 .Include(t => t.PrimaryManager)
+                                .Where(pm => !string.IsNullOrEmpty(pm.PrimaryManagerId))
                                 .Select(pm => pm.PrimaryManagerId)
                                 .ToListAsync();
             return allManagers.Where(m => !assignedManagerIds.Contains(m.Id)).ToList();

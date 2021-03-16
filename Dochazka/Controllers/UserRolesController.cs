@@ -93,10 +93,10 @@ namespace Dochazka.Controllers
             var model = new ManageUserViewModel
             { 
                 UserId = user.Id,
-                TeamId = user.Team.TeamId
+                TeamModelId = user.Team.TeamModelId
             };
 
-            ViewBag.Teams = new SelectList(await _context.Teams.ToListAsync(), "TeamId", "TeamName", model.TeamId ?? default(int));
+            ViewBag.Teams = new SelectList(await _context.Teams.ToListAsync(), "TeamModelId", "TeamName", model.TeamModelId ?? default(int));
             ViewBag.UserName = user.UserName;
 
 
@@ -136,16 +136,16 @@ namespace Dochazka.Controllers
                 return NotFound();
             }
 
-            if (input.TeamId != null)
+            if (input.TeamModelId != null)
             {
-                user.Team = await _context.Teams.FindAsync(input.TeamId);
+                user.Team = await _context.Teams.FindAsync(input.TeamModelId);
             }
             else
             {
                 user.Team = await _context.Teams.Where(t => t.TeamName == CommonConstants.DEFAULT_TEAM ).FirstOrDefaultAsync();
             }
 
-            if (input.TeamId != user.Team?.TeamId)
+            if (input.TeamModelId != user.Team?.TeamModelId)
             {                
                 await _userManager.UpdateAsync(user);
             }

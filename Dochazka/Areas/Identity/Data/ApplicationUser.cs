@@ -22,6 +22,6 @@ namespace Dochazka.Areas.Identity.Data
             }
         }
               
-        public Team Team { get; set; }
+        public TeamModel Team { get; set; }
     }
 }

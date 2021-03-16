@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Dochazka.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20210124190434_initialcreate")]
-    partial class initialcreate
+    [Migration("20210316220559_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -72,7 +72,7 @@ namespace Dochazka.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("TeamId")
+                    b.Property<int?>("TeamModelId")
                         .HasColumnType("int");
 
                     b.Property<bool>("TwoFactorEnabled")
@@ -92,12 +92,12 @@ namespace Dochazka.Migrations
                         .HasName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
-                    b.HasIndex("TeamId");
+                    b.HasIndex("TeamModelId");
 
                     b.ToTable("AspNetUsers");
                 });
 
-            modelBuilder.Entity("Dochazka.Models.AttendanceRecord", b =>
+            modelBuilder.Entity("Dochazka.Models.AttendanceRecordModel", b =>
                 {
                     b.Property<string>("EmployeeId")
                         .HasColumnType("nvarchar(450)");
@@ -124,55 +124,15 @@ namespace Dochazka.Migrations
                     b.ToTable("AttendanceRecords");
                 });
 
-            modelBuilder.Entity("Dochazka.Models.Contact", b =>
+            modelBuilder.Entity("Dochazka.Models.TeamModel", b =>
                 {
-                    b.Property<int>("ContactId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Address")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("City")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("OwnerID")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.Property<string>("State")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Zip")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ContactId");
-
-                    b.ToTable("Contact");
-                });
-
-            modelBuilder.Entity("Dochazka.Models.Team", b =>
-                {
-                    b.Property<int>("TeamId")
+                    b.Property<int>("TeamModelId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("PrimaryManagerId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("TeamName")
@@ -180,7 +140,7 @@ namespace Dochazka.Migrations
                         .HasColumnType("nvarchar(50)")
                         .HasMaxLength(50);
 
-                    b.HasKey("TeamId");
+                    b.HasKey("TeamModelId");
 
                     b.HasIndex("PrimaryManagerId");
 
@@ -327,12 +287,12 @@ namespace Dochazka.Migrations
 
             modelBuilder.Entity("Dochazka.Areas.Identity.Data.ApplicationUser", b =>
                 {
-                    b.HasOne("Dochazka.Models.Team", "Team")
+                    b.HasOne("Dochazka.Models.TeamModel", "Team")
                         .WithMany("TeamMembers")
-                        .HasForeignKey("TeamId");
+                        .HasForeignKey("TeamModelId");
                 });
 
-            modelBuilder.Entity("Dochazka.Models.AttendanceRecord", b =>
+            modelBuilder.Entity("Dochazka.Models.AttendanceRecordModel", b =>
                 {
                     b.HasOne("Dochazka.Areas.Identity.Data.ApplicationUser", "Employee")
                         .WithMany()
@@ -341,11 +301,13 @@ namespace Dochazka.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Dochazka.Models.Team", b =>
+            modelBuilder.Entity("Dochazka.Models.TeamModel", b =>
                 {
                     b.HasOne("Dochazka.Areas.Identity.Data.ApplicationUser", "PrimaryManager")
                         .WithMany()
-                        .HasForeignKey("PrimaryManagerId");
+                        .HasForeignKey("PrimaryManagerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

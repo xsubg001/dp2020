@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace Dochazka.Models
 {
@@ -14,6 +10,6 @@ namespace Dochazka.Models
         public IList<RoleSelection> RoleSelections { get; set; } = new List<RoleSelection>();
         public string UserId { get; set; }        
 
-        public int? TeamId { get; set; }
+        public int? TeamModelId { get; set; }
     }
 }

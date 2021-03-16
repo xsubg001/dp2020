@@ -57,7 +57,7 @@ namespace Dochazka.Tests.UnitTests
             // Assert
 
             var viewResult = Assert.IsType<ViewResult>(result);
-            var model = Assert.IsAssignableFrom<IEnumerable<Team>>(
+            var model = Assert.IsAssignableFrom<IEnumerable<TeamModel>>(
                 viewResult.ViewData.Model);
             Assert.Equal(2, model.Count());
         }
@@ -103,7 +103,7 @@ namespace Dochazka.Tests.UnitTests
 
             // Assert           
             var viewResult = Assert.IsType<ViewResult>(result);
-            var model = Assert.IsAssignableFrom<Team>(
+            var model = Assert.IsAssignableFrom<TeamModel>(
                 viewResult.ViewData.Model);
             Assert.True(viewResult.ViewData.ContainsKey("teamMembers"));
             var teamMembers = Assert.IsType<List<ApplicationUser>>(viewResult.ViewData["teamMembers"]);            
@@ -118,10 +118,10 @@ namespace Dochazka.Tests.UnitTests
                 context.Database.EnsureDeleted();
                 context.Database.EnsureCreated();
 
-                var team1 = new Team()
+                var team1 = new TeamModel()
                 {
                     TeamName = "TestTeam1",
-                    TeamId = 1,
+                    TeamModelId = 1,
                     PrimaryManager = new ApplicationUser()
                     {
                         UserName = "testmgr021@testmail.com",
@@ -144,10 +144,10 @@ namespace Dochazka.Tests.UnitTests
 
                 };
 
-                var team2 = new Team()
+                var team2 = new TeamModel()
                 {
                     TeamName = "TestTeam2",
-                    TeamId = 2,
+                    TeamModelId = 2,
                     PrimaryManager = new ApplicationUser()
                     {
                         UserName = "testmgr022@testmail.com",
@@ -183,40 +183,40 @@ namespace Dochazka.Tests.UnitTests
                 {
                     UserName = "teamMember210@testmail.com",
                     Id = "210",
-                    Team = new Team()
+                    Team = new TeamModel()
                     {
                         TeamName = "TestTeam1",
-                        TeamId = 1
+                        TeamModelId = 1
                     }
                 },
                 new ApplicationUser()
                 {
                     UserName = "teamMember211@testmail.com",
                     Id = "211",
-                    Team = new Team()
+                    Team = new TeamModel()
                     {
                         TeamName = "TestTeam1",
-                        TeamId = 1
+                        TeamModelId = 1
                     }
                 },
                 new ApplicationUser()
                 {
                     UserName = "teamMember212@testmail.com",
                     Id = "212",
-                    Team = new Team()
+                    Team = new TeamModel()
                     {
                         TeamName = "TestTeam1",
-                        TeamId = 1
+                        TeamModelId = 1
                     }
                 },
                 new ApplicationUser()
                 {
                     UserName = "teamMember220@testmail.com",
                     Id = "220",
-                    Team = new Team()
+                    Team = new TeamModel()
                     {
                         TeamName = "TestTeam2",
-                        TeamId = 2
+                        TeamModelId = 2
                     }
                 }
             };

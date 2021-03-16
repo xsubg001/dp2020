@@ -109,12 +109,12 @@ namespace Dochazka.Controllers
             }
             else
             {
-                return View(await PaginatedList<AttendanceRecord>.CreateAsync(attendanceRecords, pageNumber ?? 1,
+                return View(await PaginatedList<AttendanceRecordModel>.CreateAsync(attendanceRecords, pageNumber ?? 1,
                     CommonConstants.PAGE_SIZE));
             }
         }
 
-        public static DataTable GetAttendanceRecordsAsDataTable(IQueryable<AttendanceRecord> attendanceRecords)
+        public static DataTable GetAttendanceRecordsAsDataTable(IQueryable<AttendanceRecordModel> attendanceRecords)
         {
             var attendanceRecordsAsList = attendanceRecords.ToList();
             DataTable table = new DataTable("ExportAsCsv");
@@ -311,15 +311,15 @@ namespace Dochazka.Controllers
             }
             else
             {
-                List<PayrollSummaryModel> payrollSummaryList = ConvertDataTableToPayrollSummaryList(exportTable);
+                List<PayrollSummaryViewModel> payrollSummaryList = ConvertDataTableToPayrollSummaryList(exportTable);
                 //return View(await PaginatedList<PayrollSummaryModel>.Create(payrollSummaryList.AsQueryable<PayrollSummaryModel>(), pageNumber ?? 1, CommonConstants.PAGE_SIZE));
                 return View(payrollSummaryList);
             }
         }
 
-        private List<PayrollSummaryModel> ConvertDataTableToPayrollSummaryList(DataTable exportTable)
+        private List<PayrollSummaryViewModel> ConvertDataTableToPayrollSummaryList(DataTable exportTable)
         {
-            return exportTable.AsEnumerable().Select(m => new PayrollSummaryModel()
+            return exportTable.AsEnumerable().Select(m => new PayrollSummaryViewModel()
             {
                 EmployeeID = m.Field<string>("EmployeeID".ToLower()),
                 UserName = m.Field<string>("UserName".ToLower()),
@@ -365,7 +365,7 @@ namespace Dochazka.Controllers
             ViewData["EmployeeId"] = new SelectList(users, "Id", "UserName", currentUserId);
             ViewData["MorningAttendance"] = new SelectList(Enum.GetNames(typeof(Attendance)));
             ViewData["AfternoonAttendance"] = new SelectList(Enum.GetNames(typeof(Attendance)));
-            return View(new AttendanceRecord());
+            return View(new AttendanceRecordModel());
         }
 
         // POST: AttendanceRecords/Create
@@ -374,7 +374,7 @@ namespace Dochazka.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("EmployeeId, WorkDay, MorningAttendance, AfternoonAttendance")]
-            AttendanceRecord attendanceRecord)
+            AttendanceRecordModel attendanceRecord)
         {
             var currentUserId = _userManager.GetUserId(User);
             var users = await GetUsersInScope(currentUserId);
@@ -420,7 +420,7 @@ namespace Dochazka.Controllers
             return users;
         }
 
-        private async Task<IQueryable<AttendanceRecord>> GetAttendanceRecordsInScope(string currentUserId, IQueryable<AttendanceRecord> attendanceRecords)
+        private async Task<IQueryable<AttendanceRecordModel>> GetAttendanceRecordsInScope(string currentUserId, IQueryable<AttendanceRecordModel> attendanceRecords)
         {
             if (!await _userManager.IsInRoleAsync(await _userManager.FindByIdAsync(currentUserId), Roles.TeamAdministratorRole.ToString()))
             {
@@ -479,7 +479,7 @@ namespace Dochazka.Controllers
                 return NotFound();
             }
 
-            if (await TryUpdateModelAsync<AttendanceRecord>( attendanceRecord, "", s => s.MorningAttendance, s => s.AfternoonAttendance, s => s.ManagerApprovalStatus))
+            if (await TryUpdateModelAsync<AttendanceRecordModel>( attendanceRecord, "", s => s.MorningAttendance, s => s.AfternoonAttendance, s => s.ManagerApprovalStatus))
             {
                 if (ModelState.IsValid)
                 {
@@ -562,7 +562,7 @@ namespace Dochazka.Controllers
         /// Helper method: Prepares ViewData and pre-selects last selection
         /// </summary>
         /// <param name="attendanceRecord"></param>
-        private void PopulateViewDataWithSelectedItems(AttendanceRecord attendanceRecord)
+        private void PopulateViewDataWithSelectedItems(AttendanceRecordModel attendanceRecord)
         {
             ViewData["EmployeeId"] = new SelectList(_context.Users, "Id", "UserName", attendanceRecord.EmployeeId);
             ViewData["MorningAttendance"] =

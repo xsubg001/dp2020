@@ -52,10 +52,10 @@ namespace Dochazka.Areas.Identity.Pages.Account.Manage
             [Display(Name = "Last Name")]
             public string LastName { get; set; }
                         
-            public Team Team { get; set; }
+            public TeamModel Team { get; set; }
 
             [Display(Name = "Team Name")]
-            public int? TeamId { get; set; }
+            public int? TeamModelId { get; set; }
 
             [Phone]
             [Display(Name = "Phone number")]
@@ -88,7 +88,7 @@ namespace Dochazka.Areas.Identity.Pages.Account.Manage
             }
 
             await LoadAsync(user);
-            ViewData["Teams"] = new SelectList(await _context.Teams.ToListAsync(), "TeamId", "TeamName", Input.Team?.TeamId ?? default(int)  );
+            ViewData["Teams"] = new SelectList(await _context.Teams.ToListAsync(), "TeamModelId", "TeamName", Input.Team?.TeamModelId ?? default(int)  );
             return Page();
         }
 
@@ -108,9 +108,9 @@ namespace Dochazka.Areas.Identity.Pages.Account.Manage
             }
             await LoadUserTeam(user);
 
-            if (Input.TeamId != null)
+            if (Input.TeamModelId != null)
             {
-                Input.Team = await _context.Teams.FindAsync(Input.TeamId);
+                Input.Team = await _context.Teams.FindAsync(Input.TeamModelId);
             }
             else {
                 Input.Team = await _context.Teams.Where(t => t.TeamName == CommonConstants.DEFAULT_TEAM ).FirstOrDefaultAsync();
@@ -143,7 +143,7 @@ namespace Dochazka.Areas.Identity.Pages.Account.Manage
                 user.LastName = Input.LastName;
             }
 
-            if (Input.Team?.TeamId != user.Team?.TeamId)
+            if (Input.Team?.TeamModelId != user.Team?.TeamModelId)
             {
                 user.Team = Input.Team;
             }
