@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -78,7 +77,7 @@ namespace Dochazka.Controllers
             {
                 ModelState.AddModelError(string.Empty, "Unable to save team with this Team Name. The team with the same team name already exists. "
                                                      + "Please give a different name to the new team.");
-                PopulateViewDataWithSelectedItems(team);
+                await PopulateViewDataWithSelectedItems(team);
                 return View(team);
             }
             if (ModelState.IsValid)
@@ -105,8 +104,8 @@ namespace Dochazka.Controllers
             {
                 return NotFound();
             }
-            var unassignedManagers = await GetUnassignedManagersForEditAsync(team.PrimaryManagerId);
-            ViewData["PrimaryManagerId"] = new SelectList(unassignedManagers, "Id", "UserName", team.PrimaryManagerId ?? unassignedManagers.FirstOrDefault().Id);
+
+            await PopulateViewDataWithSelectedItems(team);
             return View(team);
         }
 
@@ -143,7 +142,8 @@ namespace Dochazka.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["PrimaryManagerId"] = new SelectList(await GetUnassignedManagersForEditAsync(team.PrimaryManagerId), "Id", "UserName", team.PrimaryManagerId);
+
+            await PopulateViewDataWithSelectedItems(team);
             return View(team);
         }
 
@@ -199,10 +199,11 @@ namespace Dochazka.Controllers
         /// Populates VieData with team name information
         /// </summary>
         /// <param name="team"></param>
-        private void PopulateViewDataWithSelectedItems(TeamModel team)
+        private async Task PopulateViewDataWithSelectedItems(TeamModel team)
         {            
-            ViewData["TeamName"] = team.TeamName;
-            ViewData["PrimaryManagerId"] = new SelectList(GetUnassignedManagersAsync().Result, "Id", "UserName", team.PrimaryManagerId);
+            ViewData["TeamName"] = team.TeamName;            
+            var unassignedManagers = await GetUnassignedManagersForEditAsync(team.PrimaryManagerId);
+            ViewData["PrimaryManagerId"] = new SelectList(unassignedManagers, "Id", "UserName", team.PrimaryManagerId ?? unassignedManagers.FirstOrDefault().Id);
         }
 
         /// <summary>
