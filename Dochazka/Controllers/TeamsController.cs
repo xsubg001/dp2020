@@ -195,26 +195,24 @@ namespace Dochazka.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+
+        /// <summary>
+        /// Helper method: Check if team with id already exists
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>bool</returns>
+
         private bool TeamExists(int id)
         {
             return _context.Teams.Any(e => e.TeamModelId == id);
         }
 
-        /// <summary>
-        /// Populates VieData with team name information
-        /// </summary>
-        /// <param name="team"></param>
-        private async Task PopulateViewDataWithSelectedItems(TeamModel team)
-        {            
-            ViewData["TeamName"] = team.TeamName;            
-            var unassignedManagers = await GetUnassignedManagersAsync(team.PrimaryManagerId);
-            ViewData["PrimaryManagerId"] = new SelectList(unassignedManagers, "Id", "UserName", team.PrimaryManagerId ?? unassignedManagers.FirstOrDefault().Id);
-        }
 
         /// <summary>
         /// Helper method: Returns list of managers, which have no team assigned yet.
         /// </summary>
-        /// <returns></returns>
+        /// <param name="id"></param>
+        /// <returns>Task<IList<ApplicationUser>></returns>
         private async Task<IList<ApplicationUser>> GetUnassignedManagersAsync(string? id)
         {
             var allManagers = await _userManager.GetUsersInRoleAsync("TeamManagerRole");
@@ -229,6 +227,16 @@ namespace Dochazka.Controllers
                 result.Add(await _userManager.FindByIdAsync(id));
             }
             return result;
+        }
+
+        /// <summary>
+        /// Helper method: Populates VieData with team name information
+        /// </summary>
+        /// <param name="team"></param>
+        private async Task PopulateViewDataWithSelectedItems(TeamModel team)
+        {            
+            var unassignedManagers = await GetUnassignedManagersAsync(team.PrimaryManagerId);
+            ViewData["PrimaryManagerId"] = new SelectList(unassignedManagers, "Id", "UserName", team.PrimaryManagerId ?? unassignedManagers.FirstOrDefault().Id);
         }
     }
 }
