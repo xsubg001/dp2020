@@ -48,6 +48,7 @@ namespace Dochazka.Controllers
             var team = await _context.Teams
                 .Include(t => t.PrimaryManager)
                 .FirstOrDefaultAsync(m => m.TeamModelId == id);
+
             if (team == null)
             {
                 return NotFound();
@@ -61,7 +62,7 @@ namespace Dochazka.Controllers
         [Authorize(Roles = "TeamAdministratorRole")]
         public async Task<IActionResult> Create()
         {
-            ViewData["PrimaryManagerId"] = new SelectList(await GetUnassignedManagersAsync(), "Id", "UserName");
+            ViewData["PrimaryManagerId"] = new SelectList(await GetUnassignedManagersAsync(null), "Id", "UserName");
             return View();
         }
 
@@ -80,14 +81,18 @@ namespace Dochazka.Controllers
                 await PopulateViewDataWithSelectedItems(team);
                 return View(team);
             }
-            if (ModelState.IsValid)
+            else if (ModelState.IsValid)
             {
                 _context.Add(team);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["PrimaryManagerId"] = new SelectList(await GetUnassignedManagersAsync(), "Id", "UserName", team.PrimaryManagerId);
-            return View(team);
+            else
+            {
+                ModelState.AddModelError(string.Empty, "Team entry is not valid. Model validation failed.");
+                await PopulateViewDataWithSelectedItems(team);
+                return View(team);
+            }            
         }
 
         // GET: Teams/Edit/5
@@ -115,7 +120,7 @@ namespace Dochazka.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "TeamAdministratorRole")]
-        public async Task<IActionResult> Edit(int id, [Bind("TeamId,TeamName,PrimaryManagerId")] TeamModel team)
+        public async Task<IActionResult> Edit(int id, [Bind("TeamModelId,TeamName,PrimaryManagerId")] TeamModel team)
         {
             if (id != team.TeamModelId)
             {
@@ -202,7 +207,7 @@ namespace Dochazka.Controllers
         private async Task PopulateViewDataWithSelectedItems(TeamModel team)
         {            
             ViewData["TeamName"] = team.TeamName;            
-            var unassignedManagers = await GetUnassignedManagersForEditAsync(team.PrimaryManagerId);
+            var unassignedManagers = await GetUnassignedManagersAsync(team.PrimaryManagerId);
             ViewData["PrimaryManagerId"] = new SelectList(unassignedManagers, "Id", "UserName", team.PrimaryManagerId ?? unassignedManagers.FirstOrDefault().Id);
         }
 
@@ -210,7 +215,7 @@ namespace Dochazka.Controllers
         /// Helper method: Returns list of managers, which have no team assigned yet.
         /// </summary>
         /// <returns></returns>
-        private async Task<IList<ApplicationUser>> GetUnassignedManagersAsync()
+        private async Task<IList<ApplicationUser>> GetUnassignedManagersAsync(string? id)
         {
             var allManagers = await _userManager.GetUsersInRoleAsync("TeamManagerRole");
             var assignedManagerIds = await _context.Teams
@@ -218,13 +223,11 @@ namespace Dochazka.Controllers
                                 .Where(pm => !string.IsNullOrEmpty(pm.PrimaryManagerId))
                                 .Select(pm => pm.PrimaryManagerId)
                                 .ToListAsync();
-            return allManagers.Where(m => !assignedManagerIds.Contains(m.Id)).ToList();
-        }
-
-        private async Task<IList<ApplicationUser>> GetUnassignedManagersForEditAsync(string id)
-        {
-            var result = await GetUnassignedManagersAsync();
-            result.Add(await _userManager.FindByIdAsync(id));
+            var result = allManagers.Where(m => !assignedManagerIds.Contains(m.Id)).ToList();
+            if (id != null)
+            {
+                result.Add(await _userManager.FindByIdAsync(id));
+            }
             return result;
         }
     }
