@@ -10,10 +10,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authorization;
 using Dochazka.Areas.Identity.Data;
 using Microsoft.AspNetCore.Identity;
-using Dochazka.HelperClasses;
 
 namespace Dochazka.Controllers
-{    
+{
     public class TeamsController : BaseController
     {
         private readonly ILogger<TeamsController> _logger;
@@ -34,7 +33,7 @@ namespace Dochazka.Controllers
             var teams = _context.Teams.Include(t => t.PrimaryManager).AsNoTracking();                                                     
             
             //return View(await teams.ToListAsync());
-            return View(await PaginatedList<TeamModel>.CreateAsync(teams, pageNumber ?? 1, CommonConstants.PAGE_SIZE));
+            return View(await PaginatedListViewModel<TeamModel>.CreateAsync(teams, pageNumber ?? 1, CommonConstants.PAGE_SIZE));
         }
 
         // GET: Teams/Details/5

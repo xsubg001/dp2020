@@ -24,7 +24,6 @@ namespace Dochazka.Data
             modelBuilder.Entity<TeamModel>()
                 .HasIndex(t => t.TeamName)
                 .IsUnique();
-
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using Dochazka.Areas.Identity.Data;
 using Dochazka.Data;
-using Dochazka.HelperClasses;
 using Dochazka.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -14,7 +13,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 namespace Dochazka.Controllers
-{    
+{
     public class UserRolesController : BaseController
     {        
         private readonly RoleManager<IdentityRole> _roleManager;
@@ -75,7 +74,7 @@ namespace Dochazka.Controllers
                     break;
             }
 
-            return View(PaginatedList<UserRolesViewModel>.Create(userRolesViewModel.AsQueryable(), pageNumber ?? 1, CommonConstants.PAGE_SIZE));            
+            return View(PaginatedListViewModel<UserRolesViewModel>.Create(userRolesViewModel.AsQueryable(), pageNumber ?? 1, CommonConstants.PAGE_SIZE));            
         }
 
         [Authorize(Roles = "TeamAdministratorRole")]

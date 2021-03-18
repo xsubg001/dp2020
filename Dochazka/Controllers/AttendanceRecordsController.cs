@@ -107,7 +107,7 @@ namespace Dochazka.Controllers
             }
             else
             {
-                return View(await PaginatedList<AttendanceRecordModel>.CreateAsync(attendanceRecords, pageNumber ?? 1, CommonConstants.PAGE_SIZE));
+                return View(await PaginatedListViewModel<AttendanceRecordModel>.CreateAsync(attendanceRecords, pageNumber ?? 1, CommonConstants.PAGE_SIZE));
             }
         }
 

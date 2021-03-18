@@ -7,8 +7,6 @@
 
 <h1>Edit work day</h1>
 
-@*<h4>@Model.WorkDay.ToString("d", CultureInfo.CurrentCulture)</h4>
-    <h4>@Html.DisplayFor(model => model.WorkDay)</h4>*@
 <hr />
 <div>
     <dl class="row">
@@ -37,8 +35,7 @@
     <form asp-action="Edit">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <input type="hidden" asp-for="WorkDay" />
-        <input type="hidden" asp-for="EmployeeId" />
-        @*<input type="hidden" asp-for="ManagerApprovalStatus" />*@
+        <input type="hidden" asp-for="EmployeeId" />        
         <div class="form-group">
             <label asp-for="MorningAttendance" class="control-label"></label>
             <select asp-for="MorningAttendance" class="form-control" asp-items="ViewBag.MorningAttendance"></select>
@@ -59,35 +56,6 @@
         </div>
     </form>
 </div>
-
-
-@*@if (Model.ManagerApprovalStatus != ManagerApprovalStatus.Approved)
-    {
-        @if ((await AuthorizationService.AuthorizeAsync(
-    User, Model, ContactOperations.Approve)).Succeeded)
-        {
-            <form style="display:inline;" method="post">
-                <input type="hidden" asp-for="WorkDay" />
-                <input type="hidden" asp-for="EmployeeId" />
-                <input type="hidden" name="status" value="@ManagerApprovalStatus.Approved" />
-                <button type="submit" class="btn btn-xs btn-success">Approve</button>
-            </form>
-        }
-    }
-
-    @if (Model.ManagerApprovalStatus != ManagerApprovalStatus.Rejected)
-    {
-        @if ((await AuthorizationService.AuthorizeAsync(
-    User, Model, ContactOperations.Reject)).Succeeded)
-        {
-            <form style="display:inline;" method="post">
-                <input type="hidden" asp-for="WorkDay" />
-                <input type="hidden" asp-for="EmployeeId" />
-                <input type="hidden" name="status" value="@ManagerApprovalStatus.Rejected" />
-                <button type="submit" class="btn btn-xs btn-danger">Reject</button>
-            </form>
-        }
-    }*@
 
 <div>
     <a asp-action="Index">Back to List</a>
