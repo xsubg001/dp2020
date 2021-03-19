@@ -8,11 +8,16 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-// dotnet aspnet-codegenerator razorpage -m Contact -dc ApplicationDbContext -udl -outDir Pages\Contacts --referenceScriptLibraries
 namespace ContactManager.Data
 {
     public static class SeedData
     {
+        /// <summary>
+        /// Main initializing method which executes initialization steps
+        /// </summary>
+        /// <param name="serviceProvider"></param>
+        /// <param name="testUserPw"></param>
+        /// <returns>void</returns>
         public static async Task Initialize(IServiceProvider serviceProvider, string testUserPw)
         {
             using (var context = new ApplicationDbContext(serviceProvider.GetRequiredService<DbContextOptions<ApplicationDbContext>>()))
@@ -24,20 +29,28 @@ namespace ContactManager.Data
 
                 foreach (var role in Enum.GetNames(typeof(Roles)))
                 {
-                    await CreateRole(serviceProvider, role);
+                    await EnsureRole(serviceProvider, role);
                 }
 
                 var adminID = await EnsureUser(serviceProvider, testUserPw, "admin@contoso.com", "Gabriela", "Cimoradska");
-                await EnsureRole(serviceProvider, adminID, Roles.TeamAdministratorRole.ToString());
-                await EnsureRole(serviceProvider, adminID, Roles.TeamManagerRole.ToString());
-                await EnsureRole(serviceProvider, adminID, Roles.TeamMemberRole.ToString());
-                await InitDefaultTeam(serviceProvider, context, CommonConstants.DEFAULT_TEAM, adminID);                
+                await EnsureUserIsInRole(serviceProvider, adminID, Roles.TeamAdministratorRole.ToString());
+                await EnsureUserIsInRole(serviceProvider, adminID, Roles.TeamManagerRole.ToString());
+                await EnsureUserIsInRole(serviceProvider, adminID, Roles.TeamMemberRole.ToString());
+                await EnsureDefaultTeam(serviceProvider, context, CommonConstants.DEFAULT_TEAM, adminID);                
             }
         }
 
-
+        /// <summary>
+        /// Ensures the user with input params exists if it doesn't exist yet
+        /// </summary>
+        /// <param name="serviceProvider"></param>
+        /// <param name="testUserPw"></param>
+        /// <param name="userName"></param>
+        /// <param name="firstName"></param>
+        /// <param name="lastName"></param>
+        /// <returns>user.Id</returns>
         private static async Task<string> EnsureUser(IServiceProvider serviceProvider,
-                                            string testUserPw, string userName, string firstName, string lastName)
+            string testUserPw, string userName, string firstName, string lastName)
         {
             var userManager = serviceProvider.GetService<UserManager<ApplicationUser>>();
 
@@ -63,7 +76,14 @@ namespace ContactManager.Data
             return user.Id;
         }
 
-        private static async Task<IdentityResult> EnsureRole(IServiceProvider serviceProvider,
+        /// <summary>
+        /// Ensures the user with uid is given the role if not yet
+        /// </summary>
+        /// <param name="serviceProvider"></param>
+        /// <param name="uid"></param>
+        /// <param name="role"></param>
+        /// <returns>IdentityResult</returns>
+        private static async Task<IdentityResult> EnsureUserIsInRole(IServiceProvider serviceProvider,
                                                               string uid, string role)
         {
             IdentityResult IR = null;
@@ -93,7 +113,13 @@ namespace ContactManager.Data
             return IR;
         }
 
-        private static async Task<IdentityResult> CreateRole(IServiceProvider serviceProvider, string role)
+        /// <summary>
+        /// Creates role if it doesn't exist yet
+        /// </summary>
+        /// <param name="serviceProvider"></param>
+        /// <param name="role"></param>
+        /// <returns>IdentityResult</returns>
+        private static async Task<IdentityResult> EnsureRole(IServiceProvider serviceProvider, string role)
         {
             IdentityResult IR = null;
             var roleManager = serviceProvider.GetService<RoleManager<IdentityRole>>();
@@ -111,8 +137,15 @@ namespace ContactManager.Data
             return IR;
         }
 
-
-        private static async Task<bool> InitDefaultTeam(IServiceProvider serviceProvider, ApplicationDbContext context, string teamName, string primaryManagerId)
+        /// <summary>
+        /// Creates a default team and sets its PrimaryManager if it doesn't exist yet
+        /// </summary>
+        /// <param name="serviceProvider"></param>
+        /// <param name="context"></param>
+        /// <param name="teamName"></param>
+        /// <param name="primaryManagerId"></param>
+        /// <returns>bool</returns>
+        private static async Task<bool> EnsureDefaultTeam(IServiceProvider serviceProvider, ApplicationDbContext context, string teamName, string primaryManagerId)
         {
             var userManager = serviceProvider.GetService<UserManager<ApplicationUser>>();
 

@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using Dochazka.Models;
-//using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 using Dochazka.Controllers;
 using Moq;
 using Dochazka.Data;
@@ -12,7 +8,6 @@ using Microsoft.AspNetCore.Identity;
 using Dochazka.Areas.Identity.Data;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
-using System.Threading;
 using Microsoft.AspNetCore.Mvc;
 using Xunit;
 using System.Threading.Tasks;
@@ -24,8 +19,8 @@ namespace Dochazka.Tests.UnitTests
     public class TeamsControllerTests
     {
         public List<int> testList;
-        private UserManager<ApplicationUser> userManager;
-        private Mock<ILogger<TeamsController>> mockLogger;
+        private readonly UserManager<ApplicationUser> userManager;
+        private readonly Mock<ILogger<TeamsController>> mockLogger;
         private DbContextOptions<ApplicationDbContext> TestContextOptions { get; set; }
         private readonly ApplicationDbContext _dbContext;
         private readonly Mock<IAuthorizationService> mockAuthorizationService;
@@ -57,8 +52,7 @@ namespace Dochazka.Tests.UnitTests
             // Assert
 
             var viewResult = Assert.IsType<ViewResult>(result);
-            var model = Assert.IsAssignableFrom<IEnumerable<TeamModel>>(
-                viewResult.ViewData.Model);
+            var model = Assert.IsAssignableFrom<IEnumerable<TeamModel>>(viewResult.ViewData.Model);
             Assert.Equal(2, model.Count());
         }
 
@@ -74,7 +68,7 @@ namespace Dochazka.Tests.UnitTests
 
             // Assert           
             var notFoundObjectResult = Assert.IsType<NotFoundResult>(result);
-            //Assert.IsType<NotFoundObjectResult>();            
+            Assert.IsType<NotFoundResult>(notFoundObjectResult);            
         }
 
 
@@ -103,14 +97,18 @@ namespace Dochazka.Tests.UnitTests
 
             // Assert           
             var viewResult = Assert.IsType<ViewResult>(result);
-            var model = Assert.IsAssignableFrom<TeamModel>(
-                viewResult.ViewData.Model);
+            var model = Assert.IsAssignableFrom<TeamModel>(viewResult.ViewData.Model);
+            Assert.Equal("TestTeam1", model.TeamName);
+            Assert.Equal("testmgr021@testmail.com", model.PrimaryManager.UserName);
             Assert.True(viewResult.ViewData.ContainsKey("teamMembers"));
             var teamMembers = Assert.IsType<List<ApplicationUser>>(viewResult.ViewData["teamMembers"]);            
             Assert.Equal(3, teamMembers.Count);
         }
 
 
+        /// <summary>
+        /// Helper method which seeds the InMemoryDatabase with sample test data, i.e. it creates test entries of TeamModel
+        /// </summary>
         private void Seed()
         {
             using (var context = new ApplicationDbContext(TestContextOptions))
@@ -174,7 +172,10 @@ namespace Dochazka.Tests.UnitTests
             }
         }
 
-
+        /// <summary>
+        /// Helper method, which returns sample test data with list of ApplicationUsers
+        /// </summary>
+        /// <returns> List<ApplicationUser></returns>
         private List<ApplicationUser> GetUsers()
         {
             var users = new List<ApplicationUser>()

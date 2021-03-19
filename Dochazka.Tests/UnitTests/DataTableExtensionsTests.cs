@@ -32,7 +32,7 @@ namespace Dochazka.Tests.UnitTests
         }
 
         [Fact]
-        public void WriteToCsvString()
+        public void WriteToCsvString_ReturnsInputDataConvertedToStringAsCsv()
         {
             // 1. Arrange              
             string expectedResult = System.IO.File.ReadAllText(@"TestResources\WriteToCsvStringTest.csv");
