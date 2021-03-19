@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Dochazka.HelperClasses;
+using Dochazka.Models;
 using Xunit;
 
 namespace Dochazka.Tests.UnitTests
-{    
+{
     public class PaginatedListTests
     {
         public List<int> testList;
@@ -26,7 +24,7 @@ namespace Dochazka.Tests.UnitTests
             var expectedResult = new List<int> { 1, 2, 3, 4 };
 
             // 2. Act
-            var actualResult = PaginatedList<int>.Create(testList.AsQueryable(), pageIndex ?? 1, pageSize);
+            var actualResult = PaginatedListViewModel<int>.Create(testList.AsQueryable(), pageIndex ?? 1, pageSize);
 
             // 3. Assert
             Assert.Equal(expectedResult.Count, actualResult.Count);
@@ -50,7 +48,7 @@ namespace Dochazka.Tests.UnitTests
             var expectedResult = new List<int> { 9, 0 };
 
             // 2. Act
-            var actualResult = PaginatedList<int>.Create(testList.AsQueryable(), pageNumber ?? 1, pageSize);
+            var actualResult = PaginatedListViewModel<int>.Create(testList.AsQueryable(), pageNumber ?? 1, pageSize);
 
             // 3. Assert
             Assert.Equal(expectedResult.Count, actualResult.Count);

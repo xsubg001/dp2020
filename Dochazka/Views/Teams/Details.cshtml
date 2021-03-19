@@ -1,4 +1,4 @@
-﻿@model Dochazka.Models.Team
+﻿@model Dochazka.Models.TeamModel
 
 @{
     ViewData["Title"] = "Details";
@@ -24,7 +24,7 @@
             @Html.DisplayFor(model => model.PrimaryManager.FullName)
         </dd>
         <dt class="col-sm-3">
-            @Dochazka.Models.TeamConstants.TeamManagerUserName
+            @Dochazka.Data.CommonConstants.TEAM_MANAGER_USERNAME
         </dt>
         <dd class="col-sm-9">
             @Html.DisplayFor(model => model.PrimaryManager.UserName)

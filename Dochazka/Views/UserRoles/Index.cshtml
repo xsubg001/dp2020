@@ -1,11 +1,10 @@
-﻿@using Dochazka.Models
-@*@model List<Dochazka.Models.UserRolesViewModel>*@
-@model PaginatedList<Dochazka.Models.UserRolesViewModel>
+﻿@model PaginatedListViewModel<Dochazka.Models.UserRolesViewModel>
 
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+
 <p class="text-danger">@ViewData["ErrorMessage"]</p>
 
 <h1>User Roles</h1>
@@ -45,16 +44,11 @@
                         <a asp-action="Manage" asp-route-id="@user.Id">Manage | </a>
                         <a asp-action="Delete" asp-route-id="@user.Id">Delete</a>
                     }
-
-                    @*@Html.ActionLink("Manage", "Manage", new { user.Id }) |
-                        @Html.ActionLink("Delete", "Delete", new { user.Id })*@
                 </td>
             </tr>
         }
     </tbody>
 </table>
-
-
 
 @{
     var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
@@ -68,6 +62,7 @@
    class="btn btn-default @prevDisabled">
     Previous
 </a>
+
 <a asp-action="Index"
    asp-route-sortOrder="@ViewData["CurrentSort"]"
    asp-route-pageNumber="@(Model.PageIndex + 1)"

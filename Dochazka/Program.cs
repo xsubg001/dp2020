@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System;
 using ContactManager.Data;
 using Dochazka.Data;
 using Microsoft.AspNetCore.Hosting;
@@ -31,20 +28,21 @@ namespace Dochazka
 
                     // requires using Microsoft.Extensions.Configuration;
                     var config = host.Services.GetRequiredService<IConfiguration>();
-                    // Set password with the Secret Manager tool.
-                    // dotnet user-secrets set SeedUserPW <pw>
-
-                    var testUserPw = config["SeedUserPW"];
-
-                    SeedData.Initialize(services, testUserPw).Wait();
+                    
+                    // test configuration service:
                     logger.LogWarning("TestKey: {TestValue}", config["TestKey"]);
+
+                    // Set password with the Secret Manager tool, dotnet user-secrets set SeedUserPW <pw>                    
+                    var testUserPw = config["SeedUserPW"];
+                    
+                    // Seed database
+                    SeedData.Initialize(services, testUserPw).Wait();                    
                 }
                 catch (Exception ex)
                 {                    
                     logger.LogError(ex, "An error occurred seeding the DB.");
                 }                
-            }
-            
+            }            
 
             host.Run();
         }

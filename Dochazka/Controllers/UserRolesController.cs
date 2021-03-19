@@ -1,6 +1,5 @@
 ﻿using Dochazka.Areas.Identity.Data;
 using Dochazka.Data;
-using Dochazka.HelperClasses;
 using Dochazka.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -8,15 +7,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Dochazka.Controllers
-{    
-    public class UserRolesController : DI_BaseController
+{
+    public class UserRolesController : BaseController
     {        
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ILogger<UserRolesController> _logger;
@@ -76,8 +74,7 @@ namespace Dochazka.Controllers
                     break;
             }
 
-            return View(PaginatedList<UserRolesViewModel>.Create(userRolesViewModel.AsQueryable(), pageNumber ?? 1, CommonConstants.PAGE_SIZE));
-            //return View(userRolesViewModel);
+            return View(PaginatedListViewModel<UserRolesViewModel>.Create(userRolesViewModel.AsQueryable(), pageNumber ?? 1, CommonConstants.PAGE_SIZE));            
         }
 
         [Authorize(Roles = "TeamAdministratorRole")]
@@ -93,10 +90,10 @@ namespace Dochazka.Controllers
             var model = new ManageUserViewModel
             { 
                 UserId = user.Id,
-                TeamId = user.Team.TeamId
+                TeamModelId = user.Team.TeamModelId
             };
 
-            ViewBag.Teams = new SelectList(await _context.Teams.ToListAsync(), "TeamId", "TeamName", model.TeamId ?? default(int));
+            ViewBag.Teams = new SelectList(await _context.Teams.ToListAsync(), "TeamModelId", "TeamName", model.TeamModelId ?? default(int));
             ViewBag.UserName = user.UserName;
 
 
@@ -136,16 +133,16 @@ namespace Dochazka.Controllers
                 return NotFound();
             }
 
-            if (input.TeamId != null)
+            if (input.TeamModelId != null)
             {
-                user.Team = await _context.Teams.FindAsync(input.TeamId);
+                user.Team = await _context.Teams.FindAsync(input.TeamModelId);
             }
             else
             {
                 user.Team = await _context.Teams.Where(t => t.TeamName == CommonConstants.DEFAULT_TEAM ).FirstOrDefaultAsync();
             }
 
-            if (input.TeamId != user.Team?.TeamId)
+            if (input.TeamModelId != user.Team?.TeamModelId)
             {                
                 await _userManager.UpdateAsync(user);
             }
@@ -154,13 +151,13 @@ namespace Dochazka.Controllers
             var result = await _userManager.RemoveFromRolesAsync(user, roles);
             if (!result.Succeeded)
             {
-                ModelState.AddModelError("", "Cannot remove user existing roles");
+                ModelState.AddModelError("", "Failed to remove existing roles from the user");
                 return View(input);
             }
             result = await _userManager.AddToRolesAsync(user, input.RoleSelections.Where(x => x.Selected).Select(y => y.RoleName));
             if (!result.Succeeded)
             {
-                ModelState.AddModelError("", "Cannot add selected roles to user");
+                ModelState.AddModelError("", "Failed to add selected roles to the user");
                 return View(input);
             }
             return RedirectToAction("Index");
@@ -208,15 +205,15 @@ namespace Dochazka.Controllers
                 var result = await _userManager.RemoveFromRolesAsync(originalUser, roles);
                 if (!result.Succeeded)
                 {                    
-                    ViewBag.ErrorMessage = "Cannot remove user existing roles";
+                    ViewBag.ErrorMessage = "Failed to remove existing roles from the user";
                     return View(user);
                 }
-                result = await _userManager.DeleteAsync(originalUser);
+
+                result = await _userManager.DeleteAsync(originalUser);                
                 return RedirectToAction(nameof(Index));
             }
             catch (DbUpdateConcurrencyException)
-            {
-                //Log the error (uncomment ex variable name and write a log.)
+            {                
                 return RedirectToAction(nameof(Delete), new { id = user.Id, concurrencyError = true });
             }
         }        

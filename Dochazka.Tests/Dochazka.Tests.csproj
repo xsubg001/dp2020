@@ -27,8 +27,4 @@
     <ContentWithTargetPath Include="TestResources\*.*" CopyToOutputDirectory="PreserveNewest" TargetPath="TestResources\%(Filename)%(Extension)" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Include="..\Dochazka\Data\SeedData.cs" Link="SeedData.cs" />
-  </ItemGroup>
-
 </Project>

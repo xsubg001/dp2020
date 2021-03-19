@@ -10,7 +10,6 @@ using Dochazka.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using System.Security.Claims;
 using Dochazka.Areas.Identity.Data;
 using System.Collections.Generic;
 using System.Globalization;
@@ -18,7 +17,7 @@ using Dochazka.HelperClasses;
 
 namespace Dochazka.Controllers
 {
-    public class AttendanceRecordsController : DI_BaseController
+    public class AttendanceRecordsController : BaseController
     {
         private readonly ILogger<AttendanceRecordsController> _logger;
 
@@ -103,81 +102,13 @@ namespace Dochazka.Controllers
             if (getAsCsv)
             {
                 DataTable exportTable = GetAttendanceRecordsAsDataTable(attendanceRecords);
-                var csvResult = new CSVResult(exportTable,
-                    $"{currentUserId}_{DateTime.Now.ToString(CultureInfo.InvariantCulture)}.csv");
+                var csvResult = new CSVResult(exportTable, $"{currentUserId}_{DateTime.Now.ToString(CultureInfo.InvariantCulture)}.csv");
                 return csvResult;
             }
             else
             {
-                return View(await PaginatedList<AttendanceRecord>.CreateAsync(attendanceRecords, pageNumber ?? 1,
-                    CommonConstants.PAGE_SIZE));
+                return View(await PaginatedListViewModel<AttendanceRecordModel>.CreateAsync(attendanceRecords, pageNumber ?? 1, CommonConstants.PAGE_SIZE));
             }
-        }
-
-        public static DataTable GetAttendanceRecordsAsDataTable(IQueryable<AttendanceRecord> attendanceRecords)
-        {
-            var attendanceRecordsAsList = attendanceRecords.ToList();
-            DataTable table = new DataTable("ExportAsCsv");
-            DataColumn[] columns =
-            {
-                new DataColumn("WorkDay", typeof(String)),
-                new DataColumn("MorningAttendance", typeof(String)),
-                new DataColumn("AfternoonAttendance", typeof(String)),
-                new DataColumn("FullName", typeof(String)),
-                new DataColumn("UserName", typeof(String)),
-                new DataColumn("Manager Approval Status", typeof(String))
-            };
-
-            table.Columns.AddRange(columns);
-
-            foreach (var ar in attendanceRecordsAsList)
-            {
-                table.Rows.Add(new object[]
-                {
-                    ar.WorkDay.Date.ToShortDateString(),
-                    ar.MorningAttendance,
-                    ar.AfternoonAttendance,
-                    ar.Employee.FullName,
-                    ar.Employee.UserName,
-                    ar.ManagerApprovalStatus
-                });
-            }
-
-            return table;
-        }
-
-
-        private async Task<DataTable> GetSummaryResultsAsDataTable(
-            Dictionary<string, Dictionary<string, int>> byEmployeeIDResults, DateTime selectedMonth)
-        {
-            DataTable table = new DataTable("ExportAsCsv");
-            DataColumn[] columns =
-            {
-                new DataColumn("employeeid", typeof(String)),
-                new DataColumn("username", typeof(String)),
-                new DataColumn("month", typeof(DateTime))
-            };
-            table.Columns.AddRange(columns);
-            foreach (string attendanceValue in Enum.GetNames(typeof(Attendance)))
-            {
-                table.Columns.Add(new DataColumn(attendanceValue.ToLower(), typeof(int)));
-            }
-
-            foreach (var employeeID in byEmployeeIDResults.Keys)
-            {
-                DataRow row = table.NewRow();
-                row["employeeid"] = employeeID;
-                row["username"] = await _userManager.FindByIdAsync(employeeID);
-                row["month"] = selectedMonth;
-                foreach (string attendanceValue in byEmployeeIDResults[employeeID].Keys)
-                {
-                    row[attendanceValue] = byEmployeeIDResults[employeeID][attendanceValue];
-                }
-
-                table.Rows.Add(row);
-            }
-
-            return table;
         }
 
 
@@ -311,29 +242,13 @@ namespace Dochazka.Controllers
             }
             else
             {
-                List<PayrollSummaryModel> payrollSummaryList = ConvertDataTableToPayrollSummaryList(exportTable);
+                List<PayrollSummaryViewModel> payrollSummaryList = ConvertDataTableToPayrollSummaryList(exportTable);
                 //return View(await PaginatedList<PayrollSummaryModel>.Create(payrollSummaryList.AsQueryable<PayrollSummaryModel>(), pageNumber ?? 1, CommonConstants.PAGE_SIZE));
                 return View(payrollSummaryList);
             }
         }
-
-        private List<PayrollSummaryModel> ConvertDataTableToPayrollSummaryList(DataTable exportTable)
-        {
-            return exportTable.AsEnumerable().Select(m => new PayrollSummaryModel()
-            {
-                EmployeeID = m.Field<string>("EmployeeID".ToLower()),
-                UserName = m.Field<string>("UserName".ToLower()),
-                Month = m.Field<DateTime>("Month".ToLower()),
-                Absence = m.Field<int>("Absence".ToLower()),
-                DoctorSickness = m.Field<int>("DoctorSickness".ToLower()),
-                PaidVacation = m.Field<int>("PaidVacation".ToLower()),
-                LegalJustification = m.Field<int>("LegalJustification".ToLower()),
-                Sickleave = m.Field<int>("Sickleave".ToLower()),
-                UnpaidVacation = m.Field<int>("Sickleave".ToLower()),
-                WorkingTime = m.Field<int>("WorkingTime".ToLower())
-            }).ToList();
-        }
-
+        
+        
         // GET: AttendanceRecords/Details/5
         public async Task<IActionResult> Details(string employeeId, DateTime workday)
         {
@@ -365,7 +280,7 @@ namespace Dochazka.Controllers
             ViewData["EmployeeId"] = new SelectList(users, "Id", "UserName", currentUserId);
             ViewData["MorningAttendance"] = new SelectList(Enum.GetNames(typeof(Attendance)));
             ViewData["AfternoonAttendance"] = new SelectList(Enum.GetNames(typeof(Attendance)));
-            return View(new AttendanceRecord());
+            return View(new AttendanceRecordModel());
         }
 
         // POST: AttendanceRecords/Create
@@ -373,8 +288,7 @@ namespace Dochazka.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("EmployeeId, WorkDay, MorningAttendance, AfternoonAttendance")]
-            AttendanceRecord attendanceRecord)
+        public async Task<IActionResult> Create([Bind("EmployeeId, WorkDay, MorningAttendance, AfternoonAttendance")] AttendanceRecordModel attendanceRecord)
         {
             var currentUserId = _userManager.GetUserId(User);
             var users = await GetUsersInScope(currentUserId);
@@ -385,7 +299,6 @@ namespace Dochazka.Controllers
                 return Forbid();
             }
 
-            //attendanceRecord.EmployeeId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (_context.AttendanceRecords.AsNoTracking().Any(p => p.EmployeeId == attendanceRecord.EmployeeId && p.WorkDay == attendanceRecord.WorkDay))
             {
                 ModelState.AddModelError(string.Empty,
@@ -406,31 +319,6 @@ namespace Dochazka.Controllers
             return View(attendanceRecord);
         }
 
-        private async Task<IQueryable<ApplicationUser>> GetUsersInScope(string currentUserId)
-        {
-            var users = _context.Users.AsNoTracking();
-
-            if (!await _userManager.IsInRoleAsync(await _userManager.FindByIdAsync(currentUserId), Roles.TeamAdministratorRole.ToString()))
-            {                
-                users = await _userManager.IsInRoleAsync(await _userManager.FindByIdAsync(currentUserId), Roles.TeamManagerRole.ToString())
-                    ? users.Where(u => u.Team.PrimaryManagerId == currentUserId || u.Id == currentUserId)
-                    : users.Where(u => u.Id == currentUserId);
-            }
-
-            return users;
-        }
-
-        private async Task<IQueryable<AttendanceRecord>> GetAttendanceRecordsInScope(string currentUserId, IQueryable<AttendanceRecord> attendanceRecords)
-        {
-            if (!await _userManager.IsInRoleAsync(await _userManager.FindByIdAsync(currentUserId), Roles.TeamAdministratorRole.ToString()))
-            {
-                attendanceRecords = await _userManager.IsInRoleAsync(await _userManager.FindByIdAsync(currentUserId), Roles.TeamManagerRole.ToString())
-                    ? attendanceRecords.Where(ar => ar.EmployeeId == currentUserId || ar.Employee.Team.PrimaryManagerId == currentUserId)
-                    : attendanceRecords.Where(ar => ar.EmployeeId == currentUserId);
-            }
-
-            return attendanceRecords;
-        }
 
         // GET: AttendanceRecords/Edit/5
         public async Task<IActionResult> Edit(string employeeId, DateTime workday)
@@ -447,17 +335,27 @@ namespace Dochazka.Controllers
                 return NotFound();
             }
 
-            PopulateViewDataWithSelectedItems(attendanceRecord);
-
             var currentUserId = _userManager.GetUserId(User);
-            if ((attendanceRecord.Employee.Team.PrimaryManagerId == currentUserId)
-                || (await _userManager.IsInRoleAsync(await _userManager.FindByIdAsync(currentUserId),
-                    Roles.TeamAdministratorRole.ToString())))
-            {
-                ViewData["ManagerApprovalControlDisabled"] = false;
-            }
+            var users = await GetUsersInScope(currentUserId);
 
-            return View(attendanceRecord);
+            // validate that posted EmployeeId is valid for current user role
+            if (!users.Any(u => u.Id == attendanceRecord.EmployeeId))
+            {
+                return Forbid();
+            }
+            else
+            {
+                PopulateViewDataWithSelectedItems(attendanceRecord);
+                
+                if ((attendanceRecord.Employee.Team.PrimaryManagerId == currentUserId)
+                    || (await _userManager.IsInRoleAsync(await _userManager.FindByIdAsync(currentUserId),
+                        Roles.TeamAdministratorRole.ToString())))
+                {
+                    ViewData["ManagerApprovalControlDisabled"] = false;
+                }
+
+                return View(attendanceRecord);
+            }
         }
 
 
@@ -479,33 +377,44 @@ namespace Dochazka.Controllers
                 return NotFound();
             }
 
-            if (await TryUpdateModelAsync<AttendanceRecord>( attendanceRecord, "", s => s.MorningAttendance, s => s.AfternoonAttendance, s => s.ManagerApprovalStatus))
+            var currentUserId = _userManager.GetUserId(User);
+            var users = await GetUsersInScope(currentUserId);
+
+            // validate that posted EmployeeId is valid for current user role
+            if (!users.Any(u => u.Id == attendanceRecord.EmployeeId))
             {
-                if (ModelState.IsValid)
-                {
-                    try
-                    {
-                        _context.Update(attendanceRecord);
-                        await _context.SaveChangesAsync();
-                    }
-                    catch (DbUpdateConcurrencyException)
-                    {
-                        if (!AttendanceRecordExists(attendanceRecord.EmployeeId, attendanceRecord.WorkDay))
-                        {
-                            return NotFound();
-                        }
-                        else
-                        {
-                            throw;
-                        }
-                    }
-
-                    return RedirectToAction(nameof(Index));
-                }
+                return Forbid();
             }
+            else
+            {
+                if (await TryUpdateModelAsync(attendanceRecord, "", s => s.MorningAttendance, s => s.AfternoonAttendance, s => s.ManagerApprovalStatus))
+                {
+                    if (ModelState.IsValid)
+                    {
+                        try
+                        {
+                            _context.Update(attendanceRecord);
+                            await _context.SaveChangesAsync();
+                        }
+                        catch (DbUpdateConcurrencyException)
+                        {
+                            if (!AttendanceRecordExists(attendanceRecord.EmployeeId, attendanceRecord.WorkDay))
+                            {
+                                return NotFound();
+                            }
+                            else
+                            {
+                                throw;
+                            }
+                        }
 
-            PopulateViewDataWithSelectedItems(attendanceRecord);
-            return View(attendanceRecord);
+                        return RedirectToAction(nameof(Index));
+                    }
+                }
+
+                PopulateViewDataWithSelectedItems(attendanceRecord);
+                return View(attendanceRecord);
+            }
         }
 
         // GET: AttendanceRecords/Delete/5
@@ -516,6 +425,7 @@ namespace Dochazka.Controllers
                 return NotFound();
             }
 
+
             var attendanceRecord = await _context.AttendanceRecords.Include(p => p.Employee).AsNoTracking()
                 .FirstOrDefaultAsync(p => p.EmployeeId == employeeId && p.WorkDay == workday);
             if (attendanceRecord == null)
@@ -523,7 +433,19 @@ namespace Dochazka.Controllers
                 return NotFound();
             }
 
-            return View(attendanceRecord);
+            var currentUserId = _userManager.GetUserId(User);
+            var users = await GetUsersInScope(currentUserId);
+
+            // validate that posted EmployeeId is valid for current user role
+            if (!users.Any(u => u.Id == attendanceRecord.EmployeeId))
+            {
+                return Forbid();
+            }
+            else
+            {
+                return View(attendanceRecord);
+            }
+            
         }
 
         // POST: AttendanceRecords/Delete/5
@@ -531,23 +453,32 @@ namespace Dochazka.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string employeeId, DateTime workday)
         {
-            _logger.LogInformation("Deleteting item with empoloyeeId={employeeId}, workday={workday}", employeeId,
-                workday.ToShortDateString());
+            _logger.LogInformation("Deleteting item with empoloyeeId={employeeId}, workday={workday}", employeeId, workday.ToShortDateString());
             if ((employeeId == null) || (workday == null))
             {
                 return NotFound();
             }
 
-            var originalAttendanceRecord = await _context.AttendanceRecords.FindAsync(employeeId, workday);
+            var attendanceRecord = await _context.AttendanceRecords.FindAsync(employeeId, workday);
+            var currentUserId = _userManager.GetUserId(User);
+            var users = await GetUsersInScope(currentUserId);
 
-            _context.AttendanceRecords.Remove(originalAttendanceRecord);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            // validate that posted EmployeeId is valid for current user role
+            if (!users.Any(u => u.Id == attendanceRecord.EmployeeId))
+            {
+                return Forbid();
+            }
+            else
+            {
+                _context.AttendanceRecords.Remove(attendanceRecord);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
         }
 
 
         /// <summary>
-        /// Helper method: Checks if any presence record with the same userId and workday already exists
+        /// Helper method: Checks if any presence record with the id and workday already exists
         /// </summary>
         /// <param name="id"></param>
         /// <param name="workday"></param>
@@ -559,10 +490,52 @@ namespace Dochazka.Controllers
 
 
         /// <summary>
+        /// Helper method: Selects attendance records based on currentUserId role,
+        /// i.e. use with TeamMemberRole can see only his own attendanceRecords, user with TeamManagerRole is permitted to see all attendanceRecords of his direct reports,
+        /// and user with TeamAdministratorRole can see any attendanceRecords
+        /// </summary>
+        /// <param name="currentUserId"></param>
+        /// <param name="attendanceRecords"></param>
+        /// <returns>Filtered attendance records</returns>
+        private async Task<IQueryable<AttendanceRecordModel>> GetAttendanceRecordsInScope(string currentUserId, IQueryable<AttendanceRecordModel> attendanceRecords)
+        {
+            if (!await _userManager.IsInRoleAsync(await _userManager.FindByIdAsync(currentUserId), Roles.TeamAdministratorRole.ToString()))
+            {
+                attendanceRecords = await _userManager.IsInRoleAsync(await _userManager.FindByIdAsync(currentUserId), Roles.TeamManagerRole.ToString())
+                    ? attendanceRecords.Where(ar => ar.EmployeeId == currentUserId || ar.Employee.Team.PrimaryManagerId == currentUserId)
+                    : attendanceRecords.Where(ar => ar.EmployeeId == currentUserId);
+            }
+
+            return attendanceRecords;
+        }
+
+
+        /// <summary>
+        /// Helper method: Selects users, for the the user with currentUserId can create attendance record. User with TeamAdministratorRole can create record for any user, 
+        /// user with TeamManagerRole can create record for direct reports only and user with TeamMemberRoler can create records only for himself
+        /// </summarycurrentUserId
+        /// <param name="currentUserId"></param>
+        /// <returns>List of users</returns>
+        private async Task<IQueryable<ApplicationUser>> GetUsersInScope(string currentUserId)
+        {
+            var users = _context.Users.AsNoTracking();
+
+            if (!await _userManager.IsInRoleAsync(await _userManager.FindByIdAsync(currentUserId), Roles.TeamAdministratorRole.ToString()))
+            {
+                users = await _userManager.IsInRoleAsync(await _userManager.FindByIdAsync(currentUserId), Roles.TeamManagerRole.ToString())
+                    ? users.Where(u => u.Team.PrimaryManagerId == currentUserId || u.Id == currentUserId)
+                    : users.Where(u => u.Id == currentUserId);
+            }
+
+            return users;
+        }
+
+
+        /// <summary>
         /// Helper method: Prepares ViewData and pre-selects last selection
         /// </summary>
         /// <param name="attendanceRecord"></param>
-        private void PopulateViewDataWithSelectedItems(AttendanceRecord attendanceRecord)
+        private void PopulateViewDataWithSelectedItems(AttendanceRecordModel attendanceRecord)
         {
             ViewData["EmployeeId"] = new SelectList(_context.Users, "Id", "UserName", attendanceRecord.EmployeeId);
             ViewData["MorningAttendance"] =
@@ -572,6 +545,109 @@ namespace Dochazka.Controllers
             ViewData["ManagerApprovalStatus"] = new SelectList(Enum.GetNames(typeof(ManagerApprovalStatus)),
                 attendanceRecord.ManagerApprovalStatus);
             ViewData["ManagerApprovalControlDisabled"] = true;
+        }
+
+
+        /// <summary>
+        /// Helper method: Converts list of attendanceRecords into DataTable
+        /// </summary>
+        /// <param name="attendanceRecords"></param>
+        /// <returns>DataTable which contains attendanceRecords as entries. It can be further converted into CSV file.</returns>
+        public static DataTable GetAttendanceRecordsAsDataTable(IQueryable<AttendanceRecordModel> attendanceRecords)
+        {
+            var attendanceRecordsAsList = attendanceRecords.ToList();
+            DataTable table = new DataTable("ExportAsCsv");
+            DataColumn[] columns =
+            {
+                new DataColumn("WorkDay", typeof(String)),
+                new DataColumn("MorningAttendance", typeof(String)),
+                new DataColumn("AfternoonAttendance", typeof(String)),
+                new DataColumn("FullName", typeof(String)),
+                new DataColumn("UserName", typeof(String)),
+                new DataColumn("Manager Approval Status", typeof(String))
+            };
+
+            table.Columns.AddRange(columns);
+
+            foreach (var ar in attendanceRecordsAsList)
+            {
+                table.Rows.Add(new object[]
+                {
+                    ar.WorkDay.Date.ToShortDateString(),
+                    ar.MorningAttendance,
+                    ar.AfternoonAttendance,
+                    ar.Employee.FullName,
+                    ar.Employee.UserName,
+                    ar.ManagerApprovalStatus
+                });
+            }
+
+            return table;
+        }
+
+        /// <summary>
+        /// Helper method: Generates DataTable with aggregated PayrollSummaryResults based on byEmployeeIDResults and selectedMonth.
+        /// This is aggregated view of attendance per employeeID and selectedMonth. Can be used for sallary calculation.
+        /// </summary>
+        /// <param name="byEmployeeIDResults"></param>
+        /// <param name="selectedMonth"></param>
+        /// <returns>DataTable with PayrollSummary entries</returns>
+        private async Task<DataTable> GetSummaryResultsAsDataTable(
+            Dictionary<string, Dictionary<string, int>> byEmployeeIDResults, DateTime selectedMonth)
+        {
+            DataTable table = new DataTable("ExportAsCsv");
+            DataColumn[] columns =
+            {
+                new DataColumn("employeeid", typeof(String)),
+                new DataColumn("username", typeof(String)),
+                new DataColumn("month", typeof(DateTime))
+            };
+
+            table.Columns.AddRange(columns);
+
+            foreach (string attendanceValue in Enum.GetNames(typeof(Attendance)))
+            {
+                table.Columns.Add(new DataColumn(attendanceValue.ToLower(), typeof(int)));
+            }
+
+            foreach (var employeeID in byEmployeeIDResults.Keys)
+            {
+                DataRow row = table.NewRow();
+                row["employeeid"] = employeeID;
+                row["username"] = await _userManager.FindByIdAsync(employeeID);
+                row["month"] = selectedMonth;
+                foreach (string attendanceValue in byEmployeeIDResults[employeeID].Keys)
+                {
+                    row[attendanceValue] = byEmployeeIDResults[employeeID][attendanceValue];
+                }
+
+                table.Rows.Add(row);
+            }
+
+            return table;
+        }
+
+
+        /// <summary>
+        /// Helper method: Converts DataTable exportTable to list, which can be further converted to CSV file
+        /// </summary>
+        /// <param name="exportTable"></param>
+        /// <returns>List of PayrollSummaryViewModel entries</returns>
+        private List<PayrollSummaryViewModel> ConvertDataTableToPayrollSummaryList(DataTable exportTable)
+        {
+            return exportTable.AsEnumerable().Select(m => new PayrollSummaryViewModel()
+            {
+                EmployeeID = m.Field<string>("EmployeeID".ToLower()),
+                UserName = m.Field<string>("UserName".ToLower()),
+                Month = m.Field<DateTime>("Month".ToLower()),
+                Absence = m.Field<int>("Absence".ToLower()),
+                DoctorSickness = m.Field<int>("DoctorSickness".ToLower()),
+                PaidVacation = m.Field<int>("PaidVacation".ToLower()),
+                LegalJustification = m.Field<int>("LegalJustification".ToLower()),
+                Sickleave = m.Field<int>("Sickleave".ToLower()),
+                UnpaidVacation = m.Field<int>("Sickleave".ToLower()),
+                WorkingTime = m.Field<int>("WorkingTime".ToLower())
+            }).ToList();
         }
     }
 }

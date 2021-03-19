@@ -1,6 +1,4 @@
-using System;
-
-namespace Dochazka.Models
+﻿namespace Dochazka.Models
 {
     public class ErrorViewModel
     {

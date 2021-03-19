@@ -1,16 +1,15 @@
 ﻿using Dochazka.Areas.Identity.Data;
-using Microsoft.AspNetCore.Identity;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
+
 
 namespace Dochazka.Models
 {
-    public class AttendanceRecord
+    /// <summary>
+    /// Model which persists AttendanceRecords for single working day and employee. It makes use of composite key, which is made from WorkDay and EmployeeId. 
+    /// See ApplicationDbContext.cs
+    /// </summary>
+    public class AttendanceRecordModel
     {
 
         [Display(Name = "Work Day Date"), DataType(DataType.Date)]
@@ -23,8 +22,12 @@ namespace Dochazka.Models
         [Display(Name = "Afternoon Attendance")]
         public Attendance AfternoonAttendance { get; set; }
 
-        // user ID from AspNetUser table.
+        // navigation property, user ID from AspNetUser table.
         public string EmployeeId { get; set; }
+
+        // navigation property
+        public ApplicationUser Employee { get; set; }
+
 
         [Display(Name = "Manager Approval Status")]
         public ManagerApprovalStatus ManagerApprovalStatus { get; set; }
@@ -32,10 +35,8 @@ namespace Dochazka.Models
         [Timestamp]
         public byte[] RowVersion { get; set; }
 
-        // navigation property
-        public ApplicationUser Employee { get; set; }
 
-        public AttendanceRecord()
+        public AttendanceRecordModel()
         {            
             AfternoonAttendance = MorningAttendance = Attendance.Absence;
             ManagerApprovalStatus = ManagerApprovalStatus.Submitted;

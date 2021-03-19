@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using Dochazka.Models;
 using Microsoft.AspNetCore.Identity;
 
@@ -8,7 +6,6 @@ namespace Dochazka.Areas.Identity.Data
 {
     public class ApplicationUser : IdentityUser
     {
-
         public string FirstName { get; set; }
         public string LastName { get; set; }
 
@@ -25,7 +22,6 @@ namespace Dochazka.Areas.Identity.Data
             }
         }
               
-        public Team Team { get; set; }
-
+        public TeamModel Team { get; set; }
     }
 }
