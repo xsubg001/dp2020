@@ -30,12 +30,12 @@ namespace Dochazka.Tests.UnitTests
         {
             TestContextOptions = new DbContextOptionsBuilder<ApplicationDbContext>().UseInMemoryDatabase("TestDB").Options;
             _dbContext = new ApplicationDbContext(TestContextOptions);
+            mockLogger = new Mock<ILogger<TeamsController>>();
             mockAuthorizationService = new Mock<IAuthorizationService>();
             mockUserStore = new Mock<IUserStore<ApplicationUser>>();
             var mockUserStoreQuearyable = mockUserStore.As<IQueryableUserStore<ApplicationUser>>();
             mockUserStoreQuearyable.Setup(x => x.Users).Returns(GetUsers().AsQueryable());
-            userManager = new UserManager<ApplicationUser>(mockUserStoreQuearyable.Object, null, null, null, null, null, null, null, null);
-            mockLogger = new Mock<ILogger<TeamsController>>();
+            userManager = new UserManager<ApplicationUser>(mockUserStoreQuearyable.Object, null, null, null, null, null, null, null, null);            
             Seed();
         }
 

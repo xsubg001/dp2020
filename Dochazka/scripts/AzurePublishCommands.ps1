@@ -1,7 +1,7 @@
-
 # 0. General variables
 $rgName = "dp2020gaci"
 $location = "West Europe"
+Connect-AzAccount -Tenant 1c23c01a-0a11-4849-a1bd-eddfe415c6d1 -Subscription bdd5ddce-ffd0-49dd-961a-d74ab44a262e
 
 # 1. User Story 22: Vytvoření služby Azure SQL Server Database
 $serverName = "dp2020gacisqlwe"
@@ -12,13 +12,11 @@ $password = Read-Host -Prompt "Enter SQL server admin password"
 $sqlServerAdminPassword = ConvertTo-SecureString -String $password -AsPlainText -Force
 $sqlAdminCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $sqlServerAdminUser, $sqlServerAdminPassword
 
-Connect-AzAccount -Tenant 1c23c01a-0a11-4849-a1bd-eddfe415c6d1 -Subscription bdd5ddce-ffd0-49dd-961a-d74ab44a262e
 New-AzResourceGroup -Name $rgName -Location $location
 New-AzSqlServer -ResourceGroupName $rgName -ServerName $serverName -Location $location -SqlAdministratorCredentials $sqlAdminCredential
 New-AzSqlServerFirewallRule -FirewallRuleName AllowAzureIpsOnly -ResourceGroupName $rgName -ServerName $serverName -StartIpAddress 0.0.0.0 -EndIpAddress 0.0.0.0
 New-AzSqlServerFirewallRule -FirewallRuleName AllowMyLocalDesktop -ResourceGroupName $rgName -ServerName $serverName -StartIpAddress $myIPaddress -EndIpAddress $myIPaddress
 New-AzSqlDatabase -ResourceGroupName $rgName -ServerName $serverName -DatabaseName $dbName -Edition Basic
-Get-AzSqlDatabase -ResourceGroupName $rgName -ServerName $serverName -DatabaseName $dbName
 
 $connectionString = "Server=tcp:$serverName.database.windows.net,1433;Database=$dbName;User ID=$sqlServerAdminUser;Password=$password;Encrypt=true;Connection Timeout=30;"
 $connectionString
@@ -38,7 +36,6 @@ $PropertiesObject = @{
 
 Set-AzResource -PropertyObject $PropertiesObject -ResourceId "/providers/Microsoft.Web/sourcecontrols/GitHub" -ApiVersion 2018-02-01 -Force
 
-# Configure GitHub deployment from your GitHub repo and deploy once.
 $gitRepoURL = "https://github.com/xsubg001/dp2020.git"
 $PropertiesObject = @{
     repoUrl = "$gitRepoURL";
@@ -64,11 +61,13 @@ exit;
 
 # 5. User Story 46: Migrace modelu databáze do instance služby Azure SQL Database
 # nutno provést v lokálním package manageru Visual Studia
+$connectionString = "<hodnota z původní lokální proměnné $connectionString z předchozí PowerShell seance>"
+$env:ConnectionStrings:DefaultConnection = $connectionString
 rm -r Migrations
 Add-Migration initialcreate
-$env:ConnectionStrings:DefaultConnection = $connectionString
 Update-Database
 # $env:ConnectionStrings:DefaultConnection = "" # volat pouze podle potřeby k resetování Connection Stringu
 
-
+# 6. Nutno provést v původní seanci PowerShellu, kde jsme připojení k Azure
+Restart-AzWebApp -ResourceGroupName $rgName -Name $webAppName 
 
