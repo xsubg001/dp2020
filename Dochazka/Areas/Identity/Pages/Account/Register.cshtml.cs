@@ -148,6 +148,7 @@ namespace Dochazka.Areas.Identity.Pages.Account
             }
 
             // If we got this far, something failed, redisplay form
+            ViewData["Teams"] = new SelectList(await _context.Teams.ToListAsync(), "TeamModelId", "TeamName");
             return Page();
         }
     }
