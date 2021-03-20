@@ -20,6 +20,7 @@ namespace Dochazka
             {
                 var services = scope.ServiceProvider;
                 var logger = services.GetRequiredService<ILogger<Program>>();
+                logger.LogInformation("DochazkaGabika: Starting the application.");
 
                 try
                 {
