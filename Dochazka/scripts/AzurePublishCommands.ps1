@@ -70,7 +70,7 @@ Set-AzWebApp -ResourceGroupName $rgName -Name $webAppName -ConnectionStrings $we
 # zde končí část nastavení Azure
 exit;
 
-# 5. User Story 46: Migrace modelu databáze do instance služby Azure SQL Database
+# 5. User Story 46: Migrace modelu databáze do instance služby Azure SQL Database 
 # nutno provést v lokálním package manageru Visual Studia
 $connectionString = "<hodnota z původní lokální proměnné $connectionString z předchozí PowerShell seance>"
 $env:ConnectionStrings:DefaultConnection = $connectionString
