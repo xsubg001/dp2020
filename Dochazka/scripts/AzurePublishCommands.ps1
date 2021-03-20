@@ -28,6 +28,17 @@ $webAppName = "dp2020wa"
 New-AzAppServicePlan -ResourceGroupName $rgName -Location $location -Name $webAppServicePlan -Tier Free
 New-AzWebApp -ResourceGroupName $rgName -AppServicePlan $webAppServicePlan -Name $webAppName -Location $location 
 
+# Nastavení AppSettings, vytvoření hesla pro admin uživatele aplikace: admin@contoso.com
+$webapp = Get-AzWebApp -ResourceGroupName $rgName  -Name $webAppName
+$appSettings = $webapp.SiteConfig.AppSettings
+$newAppSettings = @{}
+ForEach ($item in $appSettings) {
+    $newAppSettings[$item.Name] = $item.Value
+}
+$newAppSettings['SeedUserPW'] = "tajneHeslo"
+$newAppSettings
+Set-AzWebApp -ResourceGroupName $rgName -Name $webAppName -AppSettings $newAppSettings
+
 # 3. User Story 44: Integrace Azure Web App se službou GitHub pro přístup ke zdrojovým kódům aplikace a jejich nasazení do App Service
 $gitToken = Read-Host -Prompt "Enter GitHub token"
 $PropertiesObject = @{    
@@ -38,8 +49,8 @@ Set-AzResource -PropertyObject $PropertiesObject -ResourceId "/providers/Microso
 
 $gitRepoURL = "https://github.com/xsubg001/dp2020.git"
 $PropertiesObject = @{
-    repoUrl = "$gitRepoURL";
-    branch = "master";
+    repoUrl             = "$gitRepoURL";
+    branch              = "master";
     isManualIntegration = $false
 }
 
@@ -49,7 +60,7 @@ Set-AzResource -PropertyObject $PropertiesObject -ResourceGroupName $rgName -Res
 # 4. User Story 45: Integrace služeb Azure App Service a Azure SQL Database 
 $webAppConnectionStrings = @{
     DefaultConnection = @{
-        Type = "SQLAzure";
+        Type  = "SQLAzure";
         Value = $connectionString
     }
 }
@@ -70,4 +81,3 @@ Update-Database
 
 # 6. Nutno provést v původní seanci PowerShellu, kde jsme připojení k Azure
 Restart-AzWebApp -ResourceGroupName $rgName -Name $webAppName 
-
