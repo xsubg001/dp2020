@@ -1,11 +1,9 @@
-﻿using Dochazka;
-using Dochazka.Areas.Identity.Data;
+﻿using Dochazka.Areas.Identity.Data;
 using Dochazka.Data;
 using Dochazka.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -20,30 +18,19 @@ namespace ContactManager.Data
         /// <param name="serviceProvider"></param>
         /// <param name="testUserPw"></param>
         /// <returns>void</returns>
-        public static async Task Initialize(IServiceProvider serviceProvider, string testUserPw, ILogger<Program> logger)
-        {            
+        public static async Task Initialize(IServiceProvider serviceProvider, string testUserPw)
+        {
             using (var context = new ApplicationDbContext(serviceProvider.GetRequiredService<DbContextOptions<ApplicationDbContext>>()))
             {
                 // For sample purposes seed both with the same password.
                 // Password is set with the following:
                 // dotnet user-secrets set SeedUserPW <pw>
                 // The admin user can do anything
+
                 foreach (var role in Enum.GetNames(typeof(Roles)))
                 {
-                    try
-                    {
-
-                        logger.LogInformation("Ensuring role: {role}", role);
-                        await EnsureRole(serviceProvider, role);
-
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.LogError(ex, "An error creating the {role}", role);
-                        throw;
-                    }
+                    await EnsureRole(serviceProvider, role);
                 }
-
 
                 var adminID = await EnsureUser(serviceProvider, testUserPw, "admin@contoso.com", "Gabriela", "Cimoradska");
                 await EnsureUserIsInRole(serviceProvider, adminID, Roles.TeamAdministratorRole.ToString());
