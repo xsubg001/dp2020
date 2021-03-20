@@ -20,6 +20,7 @@ namespace Dochazka
             {
                 var services = scope.ServiceProvider;
                 var logger = services.GetRequiredService<ILogger<Program>>();
+                logger.LogInformation("DochazkaGabika: Starting the application.");
 
                 try
                 {
@@ -30,13 +31,15 @@ namespace Dochazka
                     var config = host.Services.GetRequiredService<IConfiguration>();
                     
                     // test configuration service:
-                    logger.LogWarning("TestKey: {TestValue}", config["TestKey"]);
+                    logger.LogInformation("TestKey: {TestValue}", config["TestKey"]);
 
                     // Set password with the Secret Manager tool, dotnet user-secrets set SeedUserPW <pw>                    
                     var testUserPw = config["SeedUserPW"];
-                    
+                    logger.LogInformation("Length SeedUserPW: {0}", testUserPw.Length);
+
                     // Seed database
-                    SeedData.Initialize(services, testUserPw).Wait();                    
+                    SeedData.Initialize(services, testUserPw, logger).Wait();
+                    logger.LogInformation("Completed seeding the DB.");
                 }
                 catch (Exception ex)
                 {                    
