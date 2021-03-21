@@ -6,7 +6,16 @@ namespace Dochazka.Areas.Identity.Data
 {
     public class ApplicationUser : IdentityUser
     {
+        [Required]
+        [DataType(DataType.Text)]
+        [StringLength(50, ErrorMessage = "First name cannot be longer than 50 characters.")]
+        [Display(Name = "First Name")]
         public string FirstName { get; set; }
+
+        [Required]
+        [DataType(DataType.Text)]
+        [StringLength(50, ErrorMessage = "First name cannot be longer than 50 characters.")]
+        [Display(Name = "Last Name")]
         public string LastName { get; set; }
 
         [Display(Name = "Full Name")]
@@ -21,7 +30,7 @@ namespace Dochazka.Areas.Identity.Data
                 return string.Empty;
             }
         }
-              
+                
         public TeamModel Team { get; set; }
     }
 }

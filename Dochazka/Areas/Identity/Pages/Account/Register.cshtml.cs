@@ -72,6 +72,7 @@ namespace Dochazka.Areas.Identity.Pages.Account
             
             public TeamModel Team { get; set; }
 
+            [Required]
             [Display(Name = "Team Name")]
             public int? TeamModelId { get; set; }
 
