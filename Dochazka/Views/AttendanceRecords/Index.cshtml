@@ -58,9 +58,9 @@
                 <tr>
                     <th>
                         <a asp-action="Index"
-                           asp-route-sortOrder="@ViewData["DateSortParm"]"
-                           asp-route-currentFilter="@ViewData["CurrentFilter"]"
-                           asp-route-selectedMonth="@ViewData["SelectedMonth"]">
+                       asp-route-sortOrder="@ViewData["DateSortParm"]"
+                       asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                       asp-route-selectedMonth="@ViewData["SelectedMonth"]">
                             @Html.DisplayNameFor(model => model[0].WorkDay)
                         </a>
                     </th>
@@ -72,9 +72,9 @@
                     </th>
                     <th>
                         <a asp-action="Index"
-                           asp-route-sortOrder="@ViewData["NameSortParm"]"
-                           asp-route-currentFilter="@ViewData["CurrentFilter"]"
-                           asp-route-selectedMonth="@ViewData["SelectedMonth"]">
+                       asp-route-sortOrder="@ViewData["NameSortParm"]"
+                       asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                       asp-route-selectedMonth="@ViewData["SelectedMonth"]">
                             @Html.DisplayNameFor(model => model[0].Employee.FullName)
                         </a>
                     </th>
@@ -83,9 +83,9 @@
                     </th>
                     <th>
                         <a asp-action="Index"
-                           asp-route-sortOrder="@ViewData["ApprovalStatusSortParm"]"
-                           asp-route-currentFilter="@ViewData["CurrentFilter"]"
-                           asp-route-selectedMonth="@ViewData["SelectedMonth"]">
+                       asp-route-sortOrder="@ViewData["ApprovalStatusSortParm"]"
+                       asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                       asp-route-selectedMonth="@ViewData["SelectedMonth"]">
                             @Html.DisplayNameFor(model => model[0].ManagerApprovalStatus)
                         </a>
                     </th>
@@ -120,16 +120,20 @@
                                     if (await userManager.IsInRoleAsync(await userManager.FindByIdAsync(currentUserId), Roles.TeamAdministratorRole.ToString()) ||
                                     (await userManager.IsInRoleAsync(await userManager.FindByIdAsync(currentUserId), Roles.TeamManagerRole.ToString()) && item.Employee.Team.PrimaryManagerId == currentUserId))
                                     {
-                                        <select name="ManagerApprovalStatuses" class="form-control" asp-items="Html.GetEnumSelectList<ManagerApprovalStatus>()">
-                                            <option selected="selected" value="@item.ManagerApprovalStatus">@item.ManagerApprovalStatus</option>
+                                        <select name="ManagerApprovalStatuses"
+                                            class="form-control"
+                                            asp-for=@item.ManagerApprovalStatus
+                                            asp-items="Html.GetEnumSelectList<ManagerApprovalStatus>()">
                                         </select>
                                     }
                                     else
                                     {
                                         <input type="hidden" name="ManagerApprovalStatuses" value="@item.ManagerApprovalStatus" />
-                                        <select name="ManagerApprovalStatuses" class="form-control" asp-items="Html.GetEnumSelectList<ManagerApprovalStatus>()"
-                                                disabled="disabled">
-                                            <option selected="selected" value="@item.ManagerApprovalStatus">@item.ManagerApprovalStatus</option>
+                                        <select name="ManagerApprovalStatuses"
+                                            disabled="disabled"
+                                            class="form-control"
+                                            asp-for=@item.ManagerApprovalStatus
+                                            asp-items="Html.GetEnumSelectList<ManagerApprovalStatus>()">
                                         </select>
                                     }
                                 }
@@ -171,14 +175,14 @@
                 Next
             </a>
         </div>
-        <div class="col-auto">            
+        <div class="col-auto">
             @if (managerControls)
             {
                 <input type="submit" value="Update Approvals" class="btn btn-primary" style="width:auto"
-                       asp-route-sortOrder="@ViewData["CurrentSort"]"                       
-                       asp-route-pageNumber="@(Model.PageIndex)"
-                       asp-route-currentFilter="@ViewData["CurrentFilter"]"
-                       asp-route-selectedMonth="@ViewData["SelectedMonth"]"/>
+                   asp-route-sortOrder="@ViewData["CurrentSort"]"
+                   asp-route-pageNumber="@(Model.PageIndex)"
+                   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                   asp-route-selectedMonth="@ViewData["SelectedMonth"]" />
             }
             <a asp-action="Index" class="btn btn-primary" style="width:auto">Cancel</a>
         </div>

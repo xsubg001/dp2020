@@ -56,8 +56,8 @@ namespace Dochazka.Controllers
             {
                 selectedMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
             }
-
-            ViewData["SelectedMonth"] = $"{selectedMonth.Year}-{selectedMonth.Month}";
+                        
+            ViewData["SelectedMonth"] = $"{selectedMonth.Year}-{selectedMonth.ToString("MM")}";       
             var daysInMonth = DateTime.DaysInMonth(selectedMonth.Year, selectedMonth.Month);
 
             ViewData["CurrentFilter"] = searchString;
@@ -193,8 +193,8 @@ namespace Dochazka.Controllers
             {
                 selectedMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
             }
-
-            ViewData["SelectedMonth"] = $"{selectedMonth.Year}-{selectedMonth.Month}";
+                        
+            ViewData["SelectedMonth"] = $"{selectedMonth.Year}-{selectedMonth.ToString("MM")}";
             var daysInMonth = DateTime.DaysInMonth(selectedMonth.Year, selectedMonth.Month);
 
             ViewData["CurrentFilter"] = searchString;
@@ -538,12 +538,9 @@ namespace Dochazka.Controllers
         private void PopulateViewDataWithSelectedItems(AttendanceRecordModel attendanceRecord)
         {
             ViewData["EmployeeId"] = new SelectList(_context.Users, "Id", "UserName", attendanceRecord.EmployeeId);
-            ViewData["MorningAttendance"] =
-                new SelectList(Enum.GetNames(typeof(Attendance)), attendanceRecord.MorningAttendance);
-            ViewData["AfternoonAttendance"] =
-                new SelectList(Enum.GetNames(typeof(Attendance)), attendanceRecord.AfternoonAttendance);
-            ViewData["ManagerApprovalStatus"] = new SelectList(Enum.GetNames(typeof(ManagerApprovalStatus)),
-                attendanceRecord.ManagerApprovalStatus);
+            ViewData["MorningAttendance"] = new SelectList(Enum.GetNames(typeof(Attendance)), attendanceRecord.MorningAttendance);
+            ViewData["AfternoonAttendance"] = new SelectList(Enum.GetNames(typeof(Attendance)), attendanceRecord.AfternoonAttendance);
+            ViewData["ManagerApprovalStatus"] = new SelectList(Enum.GetNames(typeof(ManagerApprovalStatus)), attendanceRecord.ManagerApprovalStatus);
             ViewData["ManagerApprovalControlDisabled"] = true;
         }
 
@@ -645,7 +642,7 @@ namespace Dochazka.Controllers
                 PaidVacation = m.Field<int>("PaidVacation".ToLower()),
                 LegalJustification = m.Field<int>("LegalJustification".ToLower()),
                 Sickleave = m.Field<int>("Sickleave".ToLower()),
-                UnpaidVacation = m.Field<int>("Sickleave".ToLower()),
+                UnpaidVacation = m.Field<int>("UnpaidVacation".ToLower()),
                 WorkingTime = m.Field<int>("WorkingTime".ToLower())
             }).ToList();
         }
