@@ -28,7 +28,7 @@
     <a asp-action="PayrollSummary"
        asp-route-getAsCsv=true
        asp-route-sortOrder="@ViewData["CurrentSort"]"
-       asp-route-selectedMonth="@ViewData["SelectedMonth"]"       
+       asp-route-selectedMonth="@ViewData["SelectedMonth"]"
        asp-route-currentFilter="@ViewData["CurrentFilter"]">
         Export Payroll Summary as CSV
     </a>
@@ -59,16 +59,16 @@
                     @Html.DisplayNameFor(model => model[0].UnpaidVacation)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model[0].Sickleave)
-                </th>
-                <th>
                     @Html.DisplayNameFor(model => model[0].DoctorSickness)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model[0].LegalJustification)
+                    @Html.DisplayNameFor(model => model[0].Sickleave)
                 </th>
                 <th>
                     @Html.DisplayNameFor(model => model[0].Absence)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model[0].LegalJustification)
                 </th>
             </tr>
         </thead>
@@ -95,16 +95,16 @@
                         @Html.DisplayFor(modelItem => item.UnpaidVacation)
                     </td>
                     <td>
-                        @Html.DisplayFor(modelItem => item.Sickleave)
-                    </td>
-                    <td>
                         @Html.DisplayFor(modelItem => item.DoctorSickness)
                     </td>
                     <td>
-                        @Html.DisplayFor(modelItem => item.LegalJustification)
+                        @Html.DisplayFor(modelItem => item.Sickleave)
                     </td>
                     <td>
                         @Html.DisplayFor(modelItem => item.Absence)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.LegalJustification)
                     </td>
                 </tr>
             }
