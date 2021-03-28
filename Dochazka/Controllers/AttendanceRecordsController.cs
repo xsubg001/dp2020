@@ -186,7 +186,7 @@ namespace Dochazka.Controllers
 
 
         // GET: Payroll summary for selected employees
-        public async Task<IActionResult> PayrollSummary(string searchString, DateTime selectedMonth, bool getAsCsv)
+        public async Task<IActionResult> PayrollSummary(string searchString, DateTime selectedMonth, string currentFilter, bool getAsCsv)
         {
             _logger.LogInformation($"Request month value: {selectedMonth}");
             if ((selectedMonth == null) || (selectedMonth == DateTime.MinValue))
@@ -196,6 +196,12 @@ namespace Dochazka.Controllers
                         
             ViewData["SelectedMonth"] = $"{selectedMonth.Year}-{selectedMonth.ToString("MM")}";
             var daysInMonth = DateTime.DaysInMonth(selectedMonth.Year, selectedMonth.Month);
+
+            
+            if (searchString == null)
+            {
+                searchString = currentFilter;
+            }
 
             ViewData["CurrentFilter"] = searchString;
 
@@ -596,7 +602,8 @@ namespace Dochazka.Controllers
             DataColumn[] columns =
             {
                 new DataColumn("employeeid", typeof(String)),
-                new DataColumn("username", typeof(String)),
+                new DataColumn("fullname", typeof(String)),
+                new DataColumn("username", typeof(String)),                
                 new DataColumn("month", typeof(DateTime))
             };
 
@@ -610,8 +617,10 @@ namespace Dochazka.Controllers
             foreach (var employeeID in byEmployeeIDResults.Keys)
             {
                 DataRow row = table.NewRow();
+                var user = await _userManager.FindByIdAsync(employeeID);
                 row["employeeid"] = employeeID;
-                row["username"] = await _userManager.FindByIdAsync(employeeID);
+                row["fullname"] = user.FullName;
+                row["username"] = user.UserName;
                 row["month"] = selectedMonth;
                 foreach (string attendanceValue in byEmployeeIDResults[employeeID].Keys)
                 {
@@ -635,6 +644,7 @@ namespace Dochazka.Controllers
             return exportTable.AsEnumerable().Select(m => new PayrollSummaryViewModel()
             {
                 EmployeeID = m.Field<string>("EmployeeID".ToLower()),
+                FullName = m.Field<string>("FullName".ToLower()),
                 UserName = m.Field<string>("UserName".ToLower()),
                 Month = m.Field<DateTime>("Month".ToLower()),
                 Absence = m.Field<int>("Absence".ToLower()),

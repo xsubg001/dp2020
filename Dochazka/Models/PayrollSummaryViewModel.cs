@@ -6,6 +6,7 @@ namespace Dochazka.Models
     public class PayrollSummaryViewModel
     {
         public string EmployeeID { get; set; }
+        public string FullName { get; set; }
         public string UserName { get; set; }
 
         [DataType(DataType.Date)]

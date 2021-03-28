@@ -12,7 +12,7 @@
         @if (User.IsInRole("TeamAdministratorRole") || User.IsInRole("TeamManagerRole"))
         {
             <div class="col-auto">
-                Filter by Full Name: <input type="text" name="searchString" value="@ViewData["CurrentFilter"]">
+                Filter by Full Name: <input type="text" name="searchString" value=@ViewData["CurrentFilter"]>
             </div>
         }
         <div class="col-auto">
@@ -42,6 +42,9 @@
             <tr>
                 <th>
                     @Html.DisplayNameFor(model => model[0].EmployeeID)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model[0].FullName)
                 </th>
                 <th>
                     @Html.DisplayNameFor(model => model[0].UserName)
@@ -80,6 +83,9 @@
                         @Html.DisplayFor(modelItem => item.EmployeeID)
                     </td>
                     <td>
+                        @Html.DisplayFor(modelItem => item.FullName)
+                    </td>
+                    <td>
                         @Html.DisplayFor(modelItem => item.UserName)
                     </td>
                     <td>
@@ -113,7 +119,11 @@
 }
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index"              
+       asp-route-selectedMonth="@ViewData["SelectedMonth"]"
+       asp-route-currentFilter="@ViewData["CurrentFilter"]">
+        Back to List
+    </a>
 </div>
 
 
