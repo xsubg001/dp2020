@@ -81,3 +81,5 @@ Update-Database
 
 # 6. Nutno provést v původní seanci PowerShellu, kde jsme připojení k Azure
 Restart-AzWebApp -ResourceGroupName $rgName -Name $webAppName 
+
+# dodatecna uprava skriptu
