@@ -23,7 +23,7 @@ namespace Dochazka.Areas.Identity.Data
         {
             get
             {
-                if (!string.IsNullOrEmpty(FirstName) || string.IsNullOrEmpty(LastName))
+                if (!string.IsNullOrEmpty(FirstName) || !string.IsNullOrEmpty(LastName))
                 {
                     return LastName + " " + FirstName;
                 }
